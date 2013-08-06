@@ -11,6 +11,20 @@ class Controller_Message extends \Controller_Template
 		$this->template->content = View::forge('message/index', $data);
 	}
 	
+	public function action_view($id = null)
+	{
+		is_null($id) and Response::redirect('message');
+	
+		if ( ! $data['message'] = Model_Message::find_by_pk($id)) {
+			Session::set_flash('error', 'Could not find message #'.$id);
+				
+			Response::redirect('message');
+		}
+	
+		$this->template->title = "Message >> View";
+		$this->template->content = View::forge('message/view', $data);
+	}
+	
 	public function action_create($id = null)
 	{
 		if (Input::method() == 'POST') {
@@ -91,19 +105,5 @@ class Controller_Message extends \Controller_Template
 		}
 		
 		Response::redirect('message');
-	}
-	
-	public function action_view($id = null)
-	{
-		is_null($id) and Response::redirect('message');
-		
-		if ( ! $data['message'] = Model_Message::find_by_pk($id)) {
-			Session::set_flash('error', 'Could not find message #'.$id);
-			
-			Response::redirect('message');
-		}
-		
-		$this->template->title = "Message >> View";
-		$this->template->content = View::forge('message/view', $data);
 	}
 }

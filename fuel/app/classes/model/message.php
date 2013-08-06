@@ -16,16 +16,6 @@ class Model_Message extends \Model_Crud {
 		'message' => 'required',
 	);
 	
-	/* protected static $_labels = array(
-			'title' => 'Your Title',
-			'message' => 'Your Message',
-	); */
-	
-	/* protected static $_defaults = array(
-			'title' => 'Input your title here',
-			'message' => 'Input your message here',
-	); */
-	
 	protected static $_created_at = 'created_at';
 	protected static $_updated_at = 'updated_at';
 	
