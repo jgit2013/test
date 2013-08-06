@@ -2,14 +2,6 @@
 
 	<fieldset>
 		<div class="control-group">
-			<?php echo Form::label('Id', 'id', array('class'=>'control-label')); ?>
-
-			<div class="controls">
-				<?php echo Form::input('id', Input::post('id', isset($message) ? $message->id : ''), array('class' => 'span4', 'placeholder'=>'Id')); ?>
-
-			</div>
-		</div>
-		<div class="control-group">
 			<?php echo Form::label('Title', 'title', array('class'=>'control-label')); ?>
 
 			<div class="controls">

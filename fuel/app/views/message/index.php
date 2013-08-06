@@ -4,7 +4,7 @@
 <table class="table table-striped">
 	<thead>
 		<tr>
-			<th>Id</th>
+			<th>Time</th>
 			<th>Title</th>
 			<th>Message</th>
 			<th>&nbsp;</th>
@@ -13,7 +13,7 @@
 	<tbody>
 <?php foreach ($messages as $message): ?>		<tr>
 
-			<td><?php echo $message->id; ?></td>
+			<td><?php echo $message->time; ?></td>
 			<td><?php echo $message->title; ?></td>
 			<td><?php echo $message->message; ?></td>
 			<td>
