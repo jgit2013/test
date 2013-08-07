@@ -43,6 +43,7 @@ class Controller_Message extends \Controller_Template
             
             if ($val->run()) {
                 $message = Model_Message::forge(array(
+                    'username' => Session::get('username'),
                     'title' => Input::post('title'),
                     'message' => Input::post('message'),
                 ));

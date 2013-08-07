@@ -85,6 +85,7 @@ class Controller_Login extends \Controller_Template
         
         $this->template->title = "Logout Successfully, Please Login Again";
         $this->template->content = View::forge('login/dologin');
+        //$this->template->content = View::forge('login/index');
     }
     
     public function action_createuser() {
