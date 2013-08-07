@@ -5,6 +5,7 @@
 	<thead>
 		<tr>
 			<th>Time</th>
+			<th>User</th>
 			<th>Title</th>
 			<th>Message</th>
 			<th>&nbsp;</th>
@@ -14,6 +15,7 @@
 <?php foreach ($messages as $message): ?>		<tr>
 
 			<td><?php echo $message->time; ?></td>
+			<td><?php echo $message->username; ?></td>
 			<td><?php echo $message->title; ?></td>
 			<td><?php echo $message->message; ?></td>
 			<td>
@@ -30,6 +32,6 @@
 <p>No Messages.</p>
 
 <?php endif; ?><p>
-	<?php echo Html::anchor('message/create', 'Add new Message', array('class' => 'btn btn-success')); ?>
-
+	<?php echo Html::anchor('message/create', 'Add New Message', array('class' => 'btn btn-success')); ?>
+	<?php echo Html::anchor('login/dologout', 'Logout', array('class' => 'btn btn-success')); ?>
 </p>

@@ -11,7 +11,7 @@
 			<?php echo Form::label('Old Password', 'oldpassword', array('class'=>'control-label')); ?>
 
 			<div class="controls">
-				<?php echo Form::password('oldpassword', '', array('class' => 'span4', 'placeholder'=>'Please Type Your Old Password')); ?>
+				<?php echo Form::password('oldpassword', '', array('class' => 'span4', 'placeholder'=>'Type Your Old Password')); ?>
 			</div>
 		</div>
 		
@@ -19,7 +19,15 @@
 			<?php echo Form::label('New Password', 'newpassword', array('class'=>'control-label')); ?>
 
 			<div class="controls">
-				<?php echo Form::password('newpassword', '', array('class' => 'span4', 'placeholder'=>'Please Type Your New Password')); ?>
+				<?php echo Form::password('newpassword', '', array('class' => 'span4', 'placeholder'=>'Type Your New Password')); ?>
+			</div>
+		</div>
+		
+		<div class="control-group">
+			<?php echo Form::label('Confirm New Password', 'confirmnewpassword', array('class'=>'control-label')); ?>
+
+			<div class="controls">
+				<?php echo Form::password('confirmnewpassword', '', array('class' => 'span4', 'placeholder'=>'Retype Your New Password')); ?>
 			</div>
 		</div>
 		

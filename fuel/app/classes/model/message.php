@@ -1,10 +1,12 @@
 <?php
-class Model_Message extends \Model_Crud {
+class Model_Message extends \Model_Crud
+{
 	protected static $_table_name = 'messages';
 	
 	protected static $_properties = array(
 		'id',
 		'time',
+	    'username',
 		'title',
 		'message',
 		'created_at',
@@ -19,11 +21,11 @@ class Model_Message extends \Model_Crud {
 	protected static $_created_at = 'created_at';
 	protected static $_updated_at = 'updated_at';
 	
-	public static function validate($factory) {
+	public static function validate($factory)
+	{
 		$val = Validation::forge($factory);
 		
-		//$val->add_field('id', 'Id', 'required|valid_string[numeric]');
-		$val->add_field('title', 'Title', 'required|max_length[50]');
+		$val->add_field('title', 'Title', 'required|min_length[1]|max_length[50]');
 		$val->add_field('message', 'Message', 'required');
 		
 		return $val;

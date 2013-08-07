@@ -7,13 +7,14 @@ class Model_User extends \Model_Crud
 		'id',
 		'username',
 		'password',
+	    'is_admin',
 		'created_at',
 		'updated_at',
 	);
 	
 	protected static $_rules = array(
-			'username' => 'required',
-			'password' => 'required',
+	    'username' => 'required',
+	    'password' => 'required',
 	);
 	
 	protected static $_created_at = 'created_at';
