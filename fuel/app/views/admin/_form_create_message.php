@@ -4,7 +4,7 @@
 			<?php echo Form::label('Username', 'username', array('class'=>'control-label')); ?>
 
 			<div class="controls">
-				<?php echo Form::label($message->username, 'showusername', array('class' => 'span4', 'placeholder'=>'Username')); ?>
+				<?php echo Form::label(Session::get('username'), 'showusername', array('class' => 'span4', 'placeholder'=>'Username')); ?>
 			</div>
 		</div>
 		

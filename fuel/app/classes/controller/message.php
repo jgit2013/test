@@ -7,7 +7,7 @@ class Controller_Message extends \Controller_Template
             Response::redirect('login');
         } */
         
-        is_null(Session::get('is_login')) and Response::redirect('login');
+        is_null(Session::get('is_login')) and Response::redirect('main');
         
         $data['messages'] = Model_Message::find(array(
             'select' => array('*'),
@@ -18,7 +18,7 @@ class Controller_Message extends \Controller_Template
         
         //echo '<pre>'; print_r($data); //print format array
         
-        $this->template->title = "Messages >> Index";
+        $this->template->title = "Hello, \"".Session::get('username')."\"";
         $this->template->content = View::forge('message/index', $data);
     }
     

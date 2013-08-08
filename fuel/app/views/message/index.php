@@ -33,5 +33,5 @@
 
 <?php endif; ?><p>
 	<?php echo Html::anchor('message/create', 'Add New Message', array('class' => 'btn btn-success')); ?>
-	<?php echo Html::anchor('login/dologout', 'Logout', array('class' => 'btn btn-success')); ?>
+	<?php echo Html::anchor('main/logout', 'Logout', array('class' => 'btn btn-success')); ?>
 </p>
