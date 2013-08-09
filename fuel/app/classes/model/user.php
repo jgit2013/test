@@ -26,7 +26,6 @@ class Model_User extends \Model_Crud
 		
 		$val->add_field('username', 'Username', 'required|min_length[1]|max_length[20]');
 		$val->add_field('password', 'Password', 'required|min_length[4]|max_length[20]');
-		//$val->add_field('is_admin', 'Is Admin', 'required|min_length[1]|max_length[1]');
 		
 		return $val;
 	}

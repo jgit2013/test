@@ -26,7 +26,7 @@ class Model_Message extends \Model_Crud
 		$val = Validation::forge($factory);
 		
 		$val->add_field('title', 'Title', 'required|min_length[1]|max_length[50]');
-		$val->add_field('message', 'Message', 'required');
+		$val->add_field('message', 'Message', 'required|min_length[1]');
 		
 		return $val;
 	}

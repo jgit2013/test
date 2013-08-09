@@ -36,7 +36,7 @@ class Controller_Message extends \Controller_Template
         $this->template->content = View::forge('message/view', $data);
     }
     
-    public function action_create($id = null)
+    public function action_create()
     {
         if (Input::method() == 'POST') {
             $val = Model_Message::validate('create');

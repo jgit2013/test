@@ -2,6 +2,7 @@
 	<fieldset>
 		<div class="control-group">
 			<?php echo Form::label('Username', 'username', array('class'=>'control-label')); ?>
+			
 			<div class="controls">
 				<?php echo Form::label($user->username, 'showusername', array('class' => 'span4', 'placeholder'=>'Username')); ?>
 			</div>

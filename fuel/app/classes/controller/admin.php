@@ -40,7 +40,7 @@ class Controller_Admin extends \Controller_Template
 			}
 		}
 		
-		$this->template->title = "Users >> Create";
+		$this->template->title = "Admin >> Create User";
 		$this->template->content = View::forge('admin/create_user');
 	}
 	
@@ -91,7 +91,7 @@ class Controller_Admin extends \Controller_Template
 	        $this->template->set_global('user', $user, false);
 	    } */
 	    
-	    $this->template->title = "Users >> Edit";
+	    $this->template->title = "Admin >> Edit User";
 	    $this->template->content = View::forge('admin/edit_user');
 	}
 	
@@ -120,7 +120,7 @@ class Controller_Admin extends \Controller_Template
 	        Response::redirect('admin');
 	    }
 	    
-	    $this->template->title = "Message >> View";
+	    $this->template->title = "Admin >> View Message";
 	    $this->template->content = View::forge('admin/view_message', $data);
 	}
 	
@@ -128,18 +128,18 @@ class Controller_Admin extends \Controller_Template
 	{
 	    if (Input::method() == 'POST') {
 	        $val = Model_Message::validate('create');
-	
+	        
 	        if ($val->run()) {
 	            $message = Model_Message::forge(array(
 	                'username' => Session::get('username'),
 	                'title' => Input::post('title'),
 	                'message' => Input::post('message'),
 	            ));
-	
+	            
 	            if ($message && $message->save()) {
 	                Session::set_flash('success', 'Added message # '.$message->id.'.');
-	
-	                Response::redirect('message');
+	                
+	                Response::redirect('admin');
 	            } else {
 	                Session::set_flash('error', 'Could not save message.');
 	            }
@@ -147,8 +147,8 @@ class Controller_Admin extends \Controller_Template
 	            Session::set_flash('error', $val->error());
 	        }
 	    }
-	
-	    $this->template->title = "Messages >> Create";
+	    
+	    $this->template->title = "Admin >> Create Message";
 	    $this->template->content = View::forge('admin/create_message');
 	}
 	
@@ -186,7 +186,7 @@ class Controller_Admin extends \Controller_Template
 	        $this->template->set_global('message', $message, false);
 	    }
 	    
-	    $this->template->title = "Messages >> Edit";
+	    $this->template->title = "Admin >> Edit Message";
 	    $this->template->content = View::forge('admin/edit_message');
 	}
 	
