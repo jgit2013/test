@@ -1,7 +1,20 @@
 <?php
+/**
+ * Main Controller class
+ *
+ * 登入頁面的主要Controller
+ *
+ * @author    J
+ */
 class Controller_Main extends \Controller_Template
 {
-    public function action_index() {
+    /**
+     * 
+     * 將頁面導到views/main/index.php，內容為主要的頁面，可選擇登入或建立新的使用者
+     * 
+     */
+    public function action_index()
+    {
        /*  Session::destroy();
         
         if ( ! is_null(Session::get('is_login')) && (Session::get('is_login') == 'True')) {
@@ -10,14 +23,16 @@ class Controller_Main extends \Controller_Template
         
         $this->template->title = "Main Page";
         $this->template->content = View::forge('main/index');
-        
-        /* $data['logins'] = Model_User::find_all();
-        
-        $this->template->title = "Main Page";
-        $this->template->content = View::forge('main/index', $data); */
     }
     
-    public function action_login() {
+    /**
+     *
+     * 將頁面導到views/main/login.php，若未登入時顯示登入頁面， 
+     * 若使用者名稱或密碼錯誤時顯示錯誤訊息
+     *
+     */
+    public function action_login()
+    {
         $is_incorrect_username_or_password = false;
         
         if (Input::method() == 'POST') {
@@ -84,7 +99,13 @@ class Controller_Main extends \Controller_Template
         }
     }
     
-    public function action_logout() {
+    /**
+     *
+     * 將頁面導到views/main/index.php，登出使用者並銷毀該次的Session物件
+     *
+     */
+    public function action_logout()
+    {
         $username = Session::get('username');
         
         Session::destroy();
@@ -94,7 +115,14 @@ class Controller_Main extends \Controller_Template
         $this->template->content = View::forge('main/index');
     }
     
-    public function action_create_user() {
+    /**
+     *
+     * 將頁面導到views/main/create_user.php，若未建立新使用者時顯示建立新使用者的頁面， 
+     * 若使用者名稱或密碼長度不足時顯示錯誤訊息
+     *
+     */
+    public function action_create_user()
+    {
         $is_username_or_password_too_short = false;
         
         if (Input::method() == 'POST') {

@@ -1,6 +1,21 @@
 <?php
+/**
+ * Message Controller class
+ *
+ * 一般使用者登入後留言版操作頁面的Controller
+ *
+ * @author    J
+ */
 class Controller_Message extends \Controller_Template
 {
+    /**
+     *
+     * 將頁面導到views/message/index.php，內容為留言版的頁面，
+     * 除了可以建立新的訊息外，也可選擇觀看自己或其他人建立的訊息，
+     * 且修改或刪除自己留的訊息 ，而訊息排列方式會由最新的訊息排到最舊的訊息
+     * 
+     *
+     */
     public function action_index()
     {
         /* if (is_null(Session::get('is_login')) && (Session::get('is_login') == 'False')) {
@@ -22,6 +37,11 @@ class Controller_Message extends \Controller_Template
         $this->template->content = View::forge('message/index', $data);
     }
     
+    /**
+     *
+     * 將頁面導到views/message/view.php，內容為顯示在留言版上的單一訊息
+     *
+     */
     public function action_view($id = null)
     {
         is_null($id) and Response::redirect('message');
@@ -36,6 +56,11 @@ class Controller_Message extends \Controller_Template
         $this->template->content = View::forge('message/view', $data);
     }
     
+    /**
+     *
+     * 將頁面導到views/main/create.php，若未建立新訊息時顯示建立新訊息的頁面，
+     *
+     */
     public function action_create()
     {
         if (Input::method() == 'POST') {
@@ -63,6 +88,7 @@ class Controller_Message extends \Controller_Template
         $this->template->title = "Messages >> Create";
         $this->template->content = View::forge('message/create');
     }
+    
     
     public function action_edit($id = null)
     {
