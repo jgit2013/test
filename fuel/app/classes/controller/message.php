@@ -80,6 +80,21 @@ class Controller_Message extends \Controller_Template
                 ));
                 
                 if ($message && $message->save()) {
+                    $log_create = Model_Log::forge(array(
+                        'username' => Session::get('username'),
+                        'action' => 'C',
+                        'before_title' => 'empty',
+                        'after_title' => Input::post('title'),
+                        'before_message' => 'empty',
+                        'after_message' => Input::post('message'),
+                    ));
+                    
+                    if ($log_create && $log_create->save()) {
+                        Session::set_flash('success', 'Added log # '.$log_create->id.'.');
+                    } else {
+                        Session::set_flash('error', 'Could not save log.');
+                    }
+                    
                     Session::set_flash('success', 'Added message # '.$message->id.'.');
                     
                     Response::redirect('message');
@@ -113,10 +128,16 @@ class Controller_Message extends \Controller_Template
         
         is_null($id) and Response::redirect('message');
         
+        $before_title = null;
+        $before_message = null;
+        
         if ( ! $message = Model_Message::find_by_pk($id)) {
             Session::set_flash('error', 'Could not find message # '.$id);
             
             Response::redirect('message');
+        } else {
+            $before_title = $message->title;
+            $before_message = $message->message;
         }
         
         $val = Model_Message::validate('edit_message');
@@ -126,6 +147,21 @@ class Controller_Message extends \Controller_Template
             $message->message = Input::post('message');
             
             if ($message->save()) {
+                $log_update = Model_Log::forge(array(
+                    'username' => Session::get('username'),
+                    'action' => 'U',
+                    'before_title' => $before_title,
+                    'after_title' => Input::post('title'),
+                    'before_message' => $before_message,
+                    'after_message' => Input::post('message'),
+                ));
+                
+                if ($log_update && $log_update->save()) {
+                    Session::set_flash('success', 'Added log # '.$log_update->id.'.');
+                } else {
+                    Session::set_flash('error', 'Could not save log.');
+                }
+                
                 Session::set_flash('success', 'Updated message # ' . $id);
                 
                 Response::redirect('message');
@@ -159,6 +195,21 @@ class Controller_Message extends \Controller_Template
         is_null($id) and Response::redirect('message');
         
         if ($message = Model_Message::find_by_pk($id)) {
+            $log_delete = Model_Log::forge(array(
+                'username' => Session::get('username'),
+                'action' => 'D',
+                'before_title' => $message->title,
+                'after_title' => 'empty',
+                'before_message' => $message->message,
+                'after_message' => 'empty',
+            ));
+            
+            if ($log_delete && $log_delete->save()) {
+                Session::set_flash('success', 'Added log # '.$log_delete->id.'.');
+            } else {
+                Session::set_flash('error', 'Could not save log.');
+            }
+            
             $message->delete();
             
             Session::set_flash('success', 'Deleted message # '.$id);
