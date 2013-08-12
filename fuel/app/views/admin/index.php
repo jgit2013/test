@@ -1,4 +1,4 @@
-<?php echo Html::anchor('main/logout', 'Logout', array('class' => 'btn btn-success')); ?>
+<?php echo Html::anchor('main/logout', 'Sign Out', array('class' => 'btn btn-success')); ?>
 <hr>
 <h2>Listing <span class='muted'>Users</span></h2>
 <?php if ($users): ?>
@@ -7,7 +7,6 @@
 		<tr>
 			<th>Username</th>
 			<th>Password</th>
-			<th>Is Admin</th>
 			<th>&nbsp;</th>
 		</tr>
 	</thead>
@@ -15,7 +14,6 @@
 <?php foreach ($users as $user): ?>		<tr>
 			<td><?php echo $user->username; ?></td>
 			<td><?php echo $user->password; ?></td>
-			<td><?php echo $user->is_admin; ?></td>
 			<td>
 			    <?php if ($user->is_admin == 0): ?>
 				<?php echo Html::anchor('admin/delete_user/'.$user->id, '<i class="icon-trash" title="Delete"></i>', array('onclick' => "return confirm('Are you sure?')")); ?>

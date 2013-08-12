@@ -10,7 +10,7 @@ class Controller_Main extends \Controller_Template
 {
     /**
      * 
-     * 將頁面導到views/main/index.php，內容為主要的頁面，可選擇登入或建立新的使用者
+     * 將頁面導向views/main/index.php，內容為主要的頁面，可選擇登入或建立新的使用者
      * 
      */
     public function action_index()
@@ -27,7 +27,7 @@ class Controller_Main extends \Controller_Template
     
     /**
      *
-     * 將頁面導到views/main/login.php，若未登入時顯示登入頁面， 
+     * 將頁面導向views/main/login.php，若未登入時顯示登入頁面， 
      * 若使用者名稱或密碼錯誤時顯示錯誤訊息
      *
      */
@@ -36,7 +36,7 @@ class Controller_Main extends \Controller_Template
         $is_incorrect_username_or_password = false;
         
         if (Input::method() == 'POST') {
-            $val = Model_User::validate('login');
+            $val = Model_User::validate('sign_in');
             
             if ($val->run()) {
                 $login = Model_User::forge(array(
@@ -91,17 +91,17 @@ class Controller_Main extends \Controller_Template
         }
         
         if ($is_incorrect_username_or_password) {
-            $this->template->title = "Incorrect Username Or Password, Please Login Again";
+            $this->template->title = "Incorrect Username Or Password";
             $this->template->content = View::forge('main/login');
         } else {
-            $this->template->title = "User Login";
+            $this->template->title = "Sign In (Admin User: Username=admin, Password=admin)";
             $this->template->content = View::forge('main/login');
         }
     }
     
     /**
      *
-     * 將頁面導到views/main/index.php，登出使用者並銷毀該次的Session物件
+     * 登出使用者並銷毀該次的Session物件
      *
      */
     public function action_logout()
@@ -110,36 +110,53 @@ class Controller_Main extends \Controller_Template
         
         Session::destroy();
         
-        $this->template->title = "Goodbye \"".$username."\", Please Login Again";
+        $this->template->title = "Goodbye \"".$username."\" ~~~~";
         //$this->template->content = View::forge('main/login');
         $this->template->content = View::forge('main/index');
     }
     
     /**
      *
-     * 將頁面導到views/main/create_user.php，若未建立新使用者時顯示建立新使用者的頁面， 
+     * 將頁面導向views/main/create_user.php，若未建立新使用者時顯示建立新使用者的頁面， 
      * 若使用者名稱或密碼長度不足時顯示錯誤訊息
      *
      */
     public function action_create_user()
     {
+        $is_username_in_use = false;
         $is_username_or_password_too_short = false;
         
         if (Input::method() == 'POST') {
-            $val = Model_User::validate('create');
+            $val = Model_User::validate('create_user');
             
             if ($val->run()) {
-                $user = Model_User::forge(array(
+                $input = Model_User::forge(array(
                     'username' => Input::post('username'),
                     'password' => Input::post('password'),
                 ));
                 
-                if ($user and $user->save()) {
-                    Session::set_flash('success', 'Added user # '.$user->id.'.');
-                    
-                    Response::redirect('message');
-                } else {
-                    Session::set_flash('error', 'Could not save user.');
+                $users = Model_User::find(array(
+                    'select' => array('username'),
+                ));
+                
+                //echo '<pre>'; print_r($users);
+                
+                foreach ($users as $user) {
+                    if ($input->username == $user->username) {
+                        $is_username_in_use = true;
+                        
+                        break;
+                    }
+                }
+                
+                if ( ! $is_username_in_use) {
+                    if ($input and $input->save()) {
+                        Session::set_flash('success', 'Added user # '.$input->id.'.');
+                        
+                        Response::redirect('main/go');
+                    } else {
+                        Session::set_flash('error', 'Could not save user.');
+                    }
                 }
             } else {
                 $is_username_or_password_too_short = true;
@@ -148,12 +165,30 @@ class Controller_Main extends \Controller_Template
             }
         }
         
-        if ($is_username_or_password_too_short) {
-            $this->template->title = "Your Username Should Be At Least \"1\" Character, And Your Password Should Be At Least \"4\" Characters";
+        if ($is_username_in_use) {
+            $this->template->title = "Your Username Is Already In Use";
             $this->template->content = View::forge('main/create_user');
         } else {
-            $this->template->title = "Create A New User";
-            $this->template->content = View::forge('main/create_user');
+            if ($is_username_or_password_too_short) {
+                $this->template->title = "Your Username Should Be At Least \"1\" Character,
+                                                          And Your Password Should Be At Least \"4\" Characters";
+            
+                $this->template->content = View::forge('main/create_user');
+            } else {
+                $this->template->title = "Create A New User";
+                $this->template->content = View::forge('main/create_user');
+            }
         }
+    }
+    
+    /**
+     *
+     * 將頁面導向views/main/go.php
+     *
+     */
+    public function action_go()
+    {
+        $this->template->title = "Create Successfully, Please Sign In";
+        $this->template->content = View::forge('main/go');
     }
 }

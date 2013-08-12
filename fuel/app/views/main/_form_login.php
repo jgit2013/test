@@ -19,7 +19,7 @@
 		<div class="control-group">
 			<label class='control-label'>&nbsp;</label>
 			<div class='controls'>
-				<?php echo Form::submit('submit', 'Login', array('class' => 'btn btn-primary')); ?>
+				<?php echo Form::submit('submit', 'Sign in', array('class' => 'btn btn-primary')); ?>
 			</div>
 		</div>
 	</fieldset>

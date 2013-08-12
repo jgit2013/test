@@ -31,6 +31,6 @@
     <p>No Messages.</p>
 <?php endif; ?><p>
 	<?php echo Html::anchor('message/create', 'Add New Message', array('class' => 'btn btn-success')); ?>
-	<?php echo Html::anchor('main/logout', 'Logout', array('class' => 'btn btn-success')); ?>
+	<?php echo Html::anchor('main/logout', 'Sign Out', array('class' => 'btn btn-success')); ?>
 </p>
 <hr>

@@ -1,10 +1,24 @@
 <?php
+/**
+ * Admin Controller class
+ *
+ * 管理者登入後留言版操作頁面的Controller
+ *
+ * @author    J
+ */
 class Controller_Admin extends \Controller_Template
 {
+    /**
+     *
+     * 將頁面導向views/admin/index.php，內容為管理者的留言版頁面，
+     * 除了可以建立新的使用者和訊息外，也可以觀看、修改或刪除所有人建立的訊息，
+     * 而訊息排列方式會由最新的訊息排到最舊的訊息
+     *
+     */
 	public function action_index()
 	{
 	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
-	        Response::redirect('main');
+	        Response::redirect('404');
 	    }
 	    
 		$data['users'] = Model_User::find_all();
@@ -17,86 +31,85 @@ class Controller_Admin extends \Controller_Template
 		$this->template->content = View::forge('admin/index', $data);
 	}
 	
+	/**
+	 *
+	 * 將頁面導向views/admin/create_user.php，若未建立新使用者時顯示建立新使用者的頁面，
+	 * 若使用者名稱或密碼長度不足時顯示錯誤訊息
+	 *
+	 */
 	public function action_create_user()
 	{
+	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	        Response::redirect('404');
+	    }
+	    
+	    $is_username_in_use = false;
+	    $is_username_or_password_too_short = false;
+	    
 		if (Input::method() == 'POST') {
 			$val = Model_User::validate('create');
 			
 			if ($val->run()) {
-				$user = Model_User::forge(array(
+				$input = Model_User::forge(array(
 					'username' => Input::post('username'),
 					'password' => Input::post('password'),
 				));
 				
-				if ($user && $user->save()) {
-					Session::set_flash('success', 'Added user # '.$user->id.'.');
-					
-					Response::redirect('admin');
-				} else {
-					Session::set_flash('error', 'Could not save user.');
+				$users = Model_User::find(array(
+				    'select' => array('username'),
+				));
+				
+				foreach ($users as $user) {
+				    if ($input->username == $user->username) {
+				        $is_username_in_use = true;
+				
+				        break;
+				    }
+				}
+				
+				if ( ! $is_username_in_use) {
+				    if ($input and $input->save()) {
+				        Session::set_flash('success', 'Added user # '.$input->id.'.');
+				
+				        Response::redirect('admin');
+				    } else {
+				        Session::set_flash('error', 'Could not save user.');
+				    }
 				}
 			} else {
+			    $is_username_or_password_too_short = true;
+			    
 				Session::set_flash('error', $val->error());
 			}
 		}
 		
-		$this->template->title = "Admin >> Create User";
-		$this->template->content = View::forge('admin/create_user');
+		if ($is_username_in_use) {
+		    $this->template->title = "The Username Is Already In Use";
+		    $this->template->content = View::forge('admin/create_user');
+		} else {
+		    if ($is_username_or_password_too_short) {
+		        $this->template->title = "Admin >> Create User (Your Username Should Be At Least \"1\" Character,
+		                                                  And Your Password Should Be At Least \"4\" Characters)";
+		    
+		        $this->template->content = View::forge('admin/create_user');
+		    } else {
+		        $this->template->title = "Admin >> Create User";
+		        $this->template->content = View::forge('admin/create_user');
+		    }
+		}
 	}
 	
-	public function action_edit_user($id = null)
-	{
-	    is_null($id) and Response::redirect('admin');
-	    
-	    if ( ! $user = Model_User::find_by_pk($id)) {
-	        Session::set_flash('error', 'Could not find user # '.$id);
-	        	
-	        Response::redirect('admin');
-	    }
-	    
-	    $user->is_admin = Input::post('is_admin');
-	    
-	    if ($user->save()) {
-	        Session::set_flash('success', 'Updated user # '. $id);
-	        
-	        Response::redirect('admin');
-	    } else {
-	        Session::set_flash('error', 'Could not update user # '. $id);
-	    }
-	    
-	    
-	    
-	    
-	    /* $val = Model_User::validate('edit');
-	    
-	    if ($val->run()) {
-	        $user->username = Input::post('username');
-	        $user->password = Input::post('password');
-	        
-	        if ($user->save()) {
-	            Session::set_flash('success', 'Updated user # '. $id);
-	
-	            Response::redirect('admin');
-	        } else {
-	            Session::set_flash('error', 'Could not update user # '. $id);
-	        }
-	    } else {
-	        if (Input::method() == 'POST') {
-	            $user->username = $val->validated('username');
-	            $user->password = $val->validated('password');
-	            
-	            Session::set_flash('error', $val->error());
-	        }
-	        
-	        $this->template->set_global('user', $user, false);
-	    } */
-	    
-	    $this->template->title = "Admin >> Edit User";
-	    $this->template->content = View::forge('admin/edit_user');
-	}
-	
+	/**
+	 *
+	 * 刪除所選的使用者
+	 *
+	 */
 	public function action_delete_user($id = null)
 	{
+	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	        Response::redirect('404');
+	    }
+	    
 	    is_null($id) and Response::redirect('admin');
 	    
 	    if ($user = Model_User::find_by_pk($id)) {
@@ -110,8 +123,17 @@ class Controller_Admin extends \Controller_Template
 	    Response::redirect('admin');
 	}
 	
+	/**
+	 *
+	 * 將頁面導向views/admin/view_message.php，內容為顯示在留言版上的單一訊息
+	 *
+	 */
 	public function action_view_message($id = null)
 	{
+	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	        Response::redirect('404');
+	    }
+	    
 	    is_null($id) and Response::redirect('admin');
 	    
 	    if ( ! $data['message'] = Model_Message::find_by_pk($id)) {
@@ -124,8 +146,20 @@ class Controller_Admin extends \Controller_Template
 	    $this->template->content = View::forge('admin/view_message', $data);
 	}
 	
+	/**
+	 *
+	 * 將頁面導向views/admin/create_message.php，若未建立新訊息時顯示建立新訊息的頁面，
+	 * 若使用者建立的標題或訊息長度不足時顯示錯誤訊息
+	 *
+	 */
 	public function action_create_message()
 	{
+	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	        Response::redirect('404');
+	    }
+	    
+	    $is_title_or_message_too_short = false;
+	    
 	    if (Input::method() == 'POST') {
 	        $val = Model_Message::validate('create');
 	        
@@ -144,16 +178,32 @@ class Controller_Admin extends \Controller_Template
 	                Session::set_flash('error', 'Could not save message.');
 	            }
 	        } else {
+	            $is_title_or_message_too_short = true;
+	            
 	            Session::set_flash('error', $val->error());
 	        }
 	    }
 	    
-	    $this->template->title = "Admin >> Create Message";
-	    $this->template->content = View::forge('admin/create_message');
+	    if ($is_title_or_message_too_short) {
+	        $this->template->title = "Admin >> Create Message (Your Title And Message Should Be At Least \"1\" Character)";
+	        $this->template->content = View::forge('admin/create_message');
+	    } else {
+	        $this->template->title = "Admin >> Create Message";
+	        $this->template->content = View::forge('admin/create_message');
+	    }
 	}
 	
+	/**
+	 *
+	 * 將頁面導向views/admin/edit_message.php，修改一則所選的訊息
+	 *
+	 */
 	public function action_edit_message($id = null)
 	{
+	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	        Response::redirect('404');
+	    }
+	    
 	    is_null($id) and Response::redirect('admin');
 	    
 	    if ( ! $message = Model_Message::find_by_pk($id)) {
@@ -190,8 +240,17 @@ class Controller_Admin extends \Controller_Template
 	    $this->template->content = View::forge('admin/edit_message');
 	}
 	
+	/**
+	 *
+	 * 刪除一則所選的訊息
+	 *
+	 */
 	public function action_delete_message($id = null)
 	{
+	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	        Response::redirect('404');
+	    }
+	    
 	    is_null($id) and Response::redirect('admin');
 	    
 	    if ($message = Model_Message::find_by_pk($id)) {

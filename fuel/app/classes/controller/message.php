@@ -10,11 +10,10 @@ class Controller_Message extends \Controller_Template
 {
     /**
      *
-     * 將頁面導到views/message/index.php，內容為留言版的頁面，
+     * 將頁面導向views/message/index.php，內容為留言版的頁面，
      * 除了可以建立新的訊息外，也可選擇觀看自己或其他人建立的訊息，
      * 且修改或刪除自己留的訊息 ，而訊息排列方式會由最新的訊息排到最舊的訊息
      * 
-     *
      */
     public function action_index()
     {
@@ -22,7 +21,7 @@ class Controller_Message extends \Controller_Template
             Response::redirect('login');
         } */
         
-        is_null(Session::get('is_login')) and Response::redirect('main');
+        is_null(Session::get('is_login')) and Response::redirect('404');
         
         $data['messages'] = Model_Message::find(array(
             'select' => array('*'),
@@ -39,11 +38,13 @@ class Controller_Message extends \Controller_Template
     
     /**
      *
-     * 將頁面導到views/message/view.php，內容為顯示在留言版上的單一訊息
+     * 將頁面導向views/message/view.php，內容為顯示在留言版上的單一訊息
      *
      */
     public function action_view($id = null)
     {
+        is_null(Session::get('is_login')) and Response::redirect('404');
+        
         is_null($id) and Response::redirect('message');
         
         if ( ! $data['message'] = Model_Message::find_by_pk($id)) {
@@ -58,13 +59,18 @@ class Controller_Message extends \Controller_Template
     
     /**
      *
-     * 將頁面導到views/main/create.php，若未建立新訊息時顯示建立新訊息的頁面，
+     * 將頁面導向views/main/create.php，若未建立新訊息時顯示建立新訊息的頁面，
+     * 若使用者建立的標題或訊息長度不足時顯示錯誤訊息
      *
      */
     public function action_create()
     {
+        is_null(Session::get('is_login')) and Response::redirect('404');
+        
+        $is_title_or_message_too_short = false;
+        
         if (Input::method() == 'POST') {
-            $val = Model_Message::validate('create');
+            $val = Model_Message::validate('create_message');
             
             if ($val->run()) {
                 $message = Model_Message::forge(array(
@@ -81,17 +87,30 @@ class Controller_Message extends \Controller_Template
                     Session::set_flash('error', 'Could not save message.');
                 }
             } else {
+                $is_title_or_message_too_short = true;
+                
                 Session::set_flash('error', $val->error());
             }
         }
         
-        $this->template->title = "Messages >> Create";
-        $this->template->content = View::forge('message/create');
+        if ($is_title_or_message_too_short) {
+            $this->template->title = "Messages >> Create (Your Title And Message Should Be At Least \"1\" Character)";
+            $this->template->content = View::forge('message/create');
+        } else {
+            $this->template->title = "Messages >> Create";
+            $this->template->content = View::forge('message/create');
+        }
     }
     
-    
+    /**
+     *
+     * 將頁面導向views/main/edit.php，修改一則該使用者自己建立的訊息
+     *
+     */
     public function action_edit($id = null)
     {
+        is_null(Session::get('is_login')) and Response::redirect('404');
+        
         is_null($id) and Response::redirect('message');
         
         if ( ! $message = Model_Message::find_by_pk($id)) {
@@ -100,7 +119,7 @@ class Controller_Message extends \Controller_Template
             Response::redirect('message');
         }
         
-        $val = Model_Message::validate('edit');
+        $val = Model_Message::validate('edit_message');
         
         if ($val->run()) {
             $message->title = Input::post('title');
@@ -128,8 +147,15 @@ class Controller_Message extends \Controller_Template
         $this->template->content = View::forge('message/edit');
     }
     
+    /**
+     *
+     * 刪除一則該使用者自己建立的訊息
+     *
+     */
     public function action_delete($id = null)
     {
+        is_null(Session::get('is_login')) and Response::redirect('404');
+        
         is_null($id) and Response::redirect('message');
         
         if ($message = Model_Message::find_by_pk($id)) {
