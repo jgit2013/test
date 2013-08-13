@@ -110,7 +110,7 @@ class Controller_Main extends \Controller_Template
         
         Session::destroy();
         
-        $this->template->title = "Goodbye \"".$username."\" ~~~~";
+        $this->template->title = "Goodbye  ~~~~ \"".$username."\"";
         //$this->template->content = View::forge('main/login');
         $this->template->content = View::forge('main/index');
     }

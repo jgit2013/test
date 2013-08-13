@@ -25,6 +25,7 @@ class Model_Log extends \Model_Crud
 	    'after_title',
 	    'before_message',
 	    'after_message',
+	    'is_succeed',
 		'created_at',
 		'updated_at',
 	);
@@ -35,10 +36,10 @@ class Model_Log extends \Model_Crud
 	protected static $_rules = array(
 	    'username' => 'required',
 	    'action' => 'required',
-	    'before_title' => 'required',
+	    /* 'before_title' => 'required',
 	    'after_title' => 'required',
 	    'before_message' => 'required',
-	    'after_message' => 'required',
+	    'after_message' => 'required', */
 	);
 	
 	/**
@@ -63,10 +64,10 @@ class Model_Log extends \Model_Crud
 	    
 	    $val->add_field('username', 'Username', 'required|min_length[1]|max_length[20]');
 	    $val->add_field('action', 'Action', 'required|min_length[1]|max_length[1]');
-	    $val->add_field('before_title', 'Before', 'required|min_length[1]|max_length[50]');
+	    /* $val->add_field('before_title', 'Before', 'required|min_length[1]|max_length[50]');
 	    $val->add_field('after_title', 'After', 'required|min_length[1]|max_length[50]');
 	    $val->add_field('before_message', 'Before', 'required|min_length[1]');
-	    $val->add_field('after_message', 'After', 'required|min_length[1]');
+	    $val->add_field('after_message', 'After', 'required|min_length[1]'); */
 	    
 	    return $val;
 	}

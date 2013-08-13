@@ -83,10 +83,11 @@ class Controller_Message extends \Controller_Template
                     $log_create = Model_Log::forge(array(
                         'username' => Session::get('username'),
                         'action' => 'C',
-                        'before_title' => 'empty',
+                        'before_title' => '',
                         'after_title' => Input::post('title'),
-                        'before_message' => 'empty',
+                        'before_message' => '',
                         'after_message' => Input::post('message'),
+                        'is_succeed' => '1',
                     ));
                     
                     if ($log_create && $log_create->save()) {
@@ -102,6 +103,22 @@ class Controller_Message extends \Controller_Template
                     Session::set_flash('error', 'Could not save message.');
                 }
             } else {
+                $log_create = Model_Log::forge(array(
+                    'username' => Session::get('username'),
+                    'action' => 'C',
+                    'before_title' => '',
+                    'after_title' => Input::post('title'),
+                    'before_message' => '',
+                    'after_message' => Input::post('message'),
+                    'is_succeed' => '0',
+                ));
+                
+                if ($log_create && $log_create->save()) {
+                    Session::set_flash('success', 'Added log # '.$log_create->id.'.');
+                } else {
+                    Session::set_flash('error', 'Could not save log.');
+                }
+                
                 $is_title_or_message_too_short = true;
                 
                 Session::set_flash('error', $val->error());
@@ -140,6 +157,8 @@ class Controller_Message extends \Controller_Template
             $before_message = $message->message;
         }
         
+        $is_title_or_message_too_short = false;
+        
         $val = Model_Message::validate('edit_message');
         
         if ($val->run()) {
@@ -154,6 +173,7 @@ class Controller_Message extends \Controller_Template
                     'after_title' => Input::post('title'),
                     'before_message' => $before_message,
                     'after_message' => Input::post('message'),
+                    'is_succeed' => '1',
                 ));
                 
                 if ($log_update && $log_update->save()) {
@@ -169,6 +189,22 @@ class Controller_Message extends \Controller_Template
                 Session::set_flash('error', 'Could not update message # ' . $id);
             }
         } else {
+            $log_update = Model_Log::forge(array(
+                'username' => Session::get('username'),
+                'action' => 'U',
+                'before_title' => $before_title,
+                'after_title' => Input::post('title'),
+                'before_message' => $before_message,
+                'after_message' => Input::post('message'),
+                'is_succeed' => '0',
+            ));
+            
+            if ($log_update && $log_update->save()) {
+                Session::set_flash('success', 'Added log # '.$log_update->id.'.');
+            } else {
+                Session::set_flash('error', 'Could not save log.');
+            }
+            
             if (Input::method() == 'POST') {
                 $message->title = $val->validated('title');
                 $message->message = $val->validated('message');
@@ -176,11 +212,18 @@ class Controller_Message extends \Controller_Template
                 Session::set_flash('error', $val->error());
             }
             
+            $is_title_or_message_too_short = true;
+            
             $this->template->set_global('message', $message, false);
         }
         
-        $this->template->title = "Messages >> Edit";
-        $this->template->content = View::forge('message/edit');
+        if ($is_title_or_message_too_short) {
+            $this->template->title = "Messages >> Edit (Your Title And Message Should Be At Least \"1\" Character)";
+            $this->template->content = View::forge('message/edit');
+        } else {
+            $this->template->title = "Messages >> Edit";
+            $this->template->content = View::forge('message/edit');
+        }
     }
     
     /**
@@ -199,14 +242,27 @@ class Controller_Message extends \Controller_Template
                 'username' => Session::get('username'),
                 'action' => 'D',
                 'before_title' => $message->title,
-                'after_title' => 'empty',
+                'after_title' => '',
                 'before_message' => $message->message,
-                'after_message' => 'empty',
+                'after_message' => '',
+                'is_succeed' => '1',
             ));
             
             if ($log_delete && $log_delete->save()) {
                 Session::set_flash('success', 'Added log # '.$log_delete->id.'.');
             } else {
+                $log_delete = Model_Log::forge(array(
+                    'username' => Session::get('username'),
+                    'action' => 'D',
+                    'before_title' => $message->title,
+                    'after_title' => '',
+                    'before_message' => $message->message,
+                    'after_message' => '',
+                    'is_succeed' => '0',
+                ));
+                
+                $log_delete->save();
+                
                 Session::set_flash('error', 'Could not save log.');
             }
             
