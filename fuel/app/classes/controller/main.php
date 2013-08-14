@@ -56,6 +56,8 @@ class Controller_Main extends \Controller_Template
                     ));
                     
                     if ( ! is_null($data['users'])) {
+                        //this place
+                        
                         Session::set('user_id', $data['users'][0]->id);
                         Session::set('username', $login->username);
                         Session::set('is_login', 'True');

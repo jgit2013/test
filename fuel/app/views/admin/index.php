@@ -1,4 +1,5 @@
-<?php echo Html::anchor('admin/view_logs', 'View Logs', array('class' => 'btn btn-success')); ?>
+<?php echo Html::anchor('admin/view_user_logs', 'View User Logs', array('class' => 'btn btn-success')); ?>
+ | <?php echo Html::anchor('admin/view_message_logs', 'View Message Logs', array('class' => 'btn btn-success')); ?>
  | <?php echo Html::anchor('main/logout', 'Sign Out', array('class' => 'btn btn-success')); ?>
 <hr>
 <h2>Listing <span class='muted'>Users</span></h2>

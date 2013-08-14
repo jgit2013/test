@@ -33,10 +33,30 @@ class Controller_Admin extends \Controller_Template
 	
 	/**
 	 *
-	 * 將頁面導向views/admin/view_logs.php，觀看所有log的頁面，
+	 * 將頁面導向views/admin/view_user_logs.php，觀看所有使用者log的頁面，
 	 *
 	 */
-	public function action_view_logs()
+	public function action_view_user_logs()
+	{
+	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	        Response::redirect('404');
+	    }
+	    
+	    $data['logs'] = Model_UserLog::find(array(
+	        'select' => array('*'),
+	        'order_by' => array('id' => 'desc'),
+	    ));
+	    
+	    $this->template->title = "Admin >> View User Logs";
+	    $this->template->content = View::forge('admin/view_user_logs', $data);
+	}
+	
+	/**
+	 *
+	 * 將頁面導向views/admin/view_message_logs.php，觀看所有訊息log的頁面，
+	 *
+	 */
+	public function action_view_message_logs()
 	{
 	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
 	        Response::redirect('404');
@@ -45,47 +65,69 @@ class Controller_Admin extends \Controller_Template
 	    $data = null;
 	    
 	    if (Input::method() == 'POST') {
-	        $input = Model_Log::forge(array(
+	        $input = Model_MessageLog::forge(array(
 	            'time' => Input::post('time'),
 	            'username' => Input::post('username'),
 	            'action' => Input::post('action'),
 	            'is_succeed' => Input::post('is_succeed'),
 	        ));
 	        
-	        $result = \DB::query("SELECT * FROM logs WHERE username='".Input::post('username')."' OR action='".Input::post('action')."' ORDER BY id DESC")->execute();
+	        /* echo '<pre>'; print_r($input);
 	        
-	        $data['logs'] = Model_Log::forge($result->as_array());
+	        exit; //debug test */
 	        
-	        echo '<pre>'; print_r($data['logs']);
+	        /* $result = \DB::query("SELECT * FROM msgboard.message_logs ".
+	                                          "WHERE time LIKE '".$input->time."%' OR ".
+	                                                        "username='".$input->username."' OR ".
+	                                                        "action='".$input->action."' OR ".
+	                                                        "is_succeed='".$input->is_succeed.
+	                                          "' ORDER BY id DESC")->execute(); */
 	        
-	        exit; //debug test
+	        //echo '<pre>'; print_r($result);
 	        
-// 	        $data['logs'] = Model_Log::find(array(
-// 	            'select' => array('*'),
-// 	            'where' => array(
-// 	                array('username', '=', $input->username),
-// 	                array('action', '=', $input->action),
-// 	                /* 'or' => array(
-// 	                    array('action', '=', $input->action),
-// 	                ), */
-// 	            ),
-// 	            'order_by' => array(
-// 	                'id' => 'desc',
-// 	            ),
-// 	        ));
+// 	        foreach ($result as $key => $value) {
+// 	            //echo '['.$key.']<br/>';
+	            
+// 	            $data['logs'][] = Model_MessageLog::forge($value);
+	            
+// 	            /* foreach ($value as $logs => $log) {
+// 	                echo '['.$logs.']'.$log.'<br/>';
+// 	            } */
+	            
+// 	            //echo '<hr/>';
+// 	        }
 	        
-// 	        echo '<pre>'; print_r($data['logs']);
+	        //$data['logs'] = Model_MessageLog::forge($result->as_array());
 	        
-// 	        exit;
+	        /* echo '<pre>'; print_r($data['logs']);
+	        
+	        exit; //debug test */
+	        
+	        $data['logs'] = Model_MessageLog::find(array(
+	            'select' => array('*'),
+	            'where' => array(
+	                //array('time', 'like', '%'.$input->time.'%'),
+	                array('username', '=', $input->username),
+	                array('action', '=', $input->action),
+	                //array('is_succeed', '=', $input->is_succeed),
+	            ),
+	            'order_by' => array(
+	                'id' => 'desc',
+	            ),
+	        ));
+	        
+	        /* echo '<pre>'; print_r($data['logs']);
+	        
+	        exit; */
 	    } else {
-	        $data['logs'] = Model_Log::find(array(
+	        $data['logs'] = Model_MessageLog::find(array(
 	            'select' => array('*'),
 	            'order_by' => array('id' => 'desc'),
 	        ));
 	    }
 	    
-	    $this->template->title = "Admin >> View Logs";
-	    $this->template->content = View::forge('admin/view_logs', $data);
+	    $this->template->title = "Admin >> View Message Logs";
+	    $this->template->content = View::forge('admin/view_message_logs', $data);
 	}
 	
 	/**
@@ -247,7 +289,7 @@ class Controller_Admin extends \Controller_Template
 	            ));
 	            
 	            if ($message && $message->save()) {
-	                $log_create = Model_Log::forge(array(
+	                $log_create = Model_MessageLog::forge(array(
 	                    'username' => Session::get('username'),
 	                    'action' => 'C',
 	                    'before_title' => '',
@@ -270,7 +312,7 @@ class Controller_Admin extends \Controller_Template
 	                Session::set_flash('error', 'Could not save message.');
 	            }
 	        } else {
-	            $log_create = Model_Log::forge(array(
+	            $log_create = Model_MessageLog::forge(array(
 	                'username' => Session::get('username'),
 	                'action' => 'C',
 	                'before_title' => '',
@@ -335,7 +377,7 @@ class Controller_Admin extends \Controller_Template
             $message->message = Input::post('message');
 	        
 	        if ($message->save()) {
-	            $log_update = Model_Log::forge(array(
+	            $log_update = Model_MessageLog::forge(array(
 	                'username' => Session::get('username'),
 	                'action' => 'U',
 	                'before_title' => $before_title,
@@ -358,7 +400,7 @@ class Controller_Admin extends \Controller_Template
 	            Session::set_flash('error', 'Could not update message # '. $id);
 	        }
 	    } else {
-	        $log_update = Model_Log::forge(array(
+	        $log_update = Model_MessageLog::forge(array(
 	            'username' => Session::get('username'),
 	            'action' => 'U',
 	            'before_title' => $before_title,
@@ -409,7 +451,7 @@ class Controller_Admin extends \Controller_Template
 	    is_null($id) and Response::redirect('admin');
 	    
 	    if ($message = Model_Message::find_by_pk($id)) {
-	        $log_delete = Model_Log::forge(array(
+	        $log_delete = Model_MessageLog::forge(array(
 	            'username' => Session::get('username'),
 	            'action' => 'D',
 	            'before_title' => $message->title,
@@ -422,7 +464,7 @@ class Controller_Admin extends \Controller_Template
 	        if ($log_delete && $log_delete->save()) {
 	            Session::set_flash('success', 'Added log # '.$log_delete->id.'.');
 	        } else {
-	            $log_delete = Model_Log::forge(array(
+	            $log_delete = Model_MessageLog::forge(array(
 	                'username' => Session::get('username'),
 	                'action' => 'D',
 	                'before_title' => $message->title,

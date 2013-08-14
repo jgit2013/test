@@ -80,7 +80,7 @@ class Controller_Message extends \Controller_Template
                 ));
                 
                 if ($message && $message->save()) {
-                    $log_create = Model_Log::forge(array(
+                    $log_create = Model_MessageLog::forge(array(
                         'username' => Session::get('username'),
                         'action' => 'C',
                         'before_title' => '',
@@ -103,7 +103,7 @@ class Controller_Message extends \Controller_Template
                     Session::set_flash('error', 'Could not save message.');
                 }
             } else {
-                $log_create = Model_Log::forge(array(
+                $log_create = Model_MessageLog::forge(array(
                     'username' => Session::get('username'),
                     'action' => 'C',
                     'before_title' => '',
@@ -166,7 +166,7 @@ class Controller_Message extends \Controller_Template
             $message->message = Input::post('message');
             
             if ($message->save()) {
-                $log_update = Model_Log::forge(array(
+                $log_update = Model_MessageLog::forge(array(
                     'username' => Session::get('username'),
                     'action' => 'U',
                     'before_title' => $before_title,
@@ -189,7 +189,7 @@ class Controller_Message extends \Controller_Template
                 Session::set_flash('error', 'Could not update message # ' . $id);
             }
         } else {
-            $log_update = Model_Log::forge(array(
+            $log_update = Model_MessageLog::forge(array(
                 'username' => Session::get('username'),
                 'action' => 'U',
                 'before_title' => $before_title,
@@ -238,7 +238,7 @@ class Controller_Message extends \Controller_Template
         is_null($id) and Response::redirect('message');
         
         if ($message = Model_Message::find_by_pk($id)) {
-            $log_delete = Model_Log::forge(array(
+            $log_delete = Model_MessageLog::forge(array(
                 'username' => Session::get('username'),
                 'action' => 'D',
                 'before_title' => $message->title,
@@ -251,7 +251,7 @@ class Controller_Message extends \Controller_Template
             if ($log_delete && $log_delete->save()) {
                 Session::set_flash('success', 'Added log # '.$log_delete->id.'.');
             } else {
-                $log_delete = Model_Log::forge(array(
+                $log_delete = Model_MessageLog::forge(array(
                     'username' => Session::get('username'),
                     'action' => 'D',
                     'before_title' => $message->title,
