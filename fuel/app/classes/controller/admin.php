@@ -9,11 +9,9 @@
 class Controller_Admin extends \Controller_Template
 {
     /**
-     *
      * 將頁面導向views/admin/index.php，內容為管理者的留言版頁面，
      * 除了可以建立新的使用者和訊息外，也可以觀看、修改或刪除所有人建立的訊息，
      * 而訊息排列方式會由最新的訊息排到最舊的訊息
-     *
      */
 	public function action_index()
 	{
@@ -32,9 +30,7 @@ class Controller_Admin extends \Controller_Template
 	}
 	
 	/**
-	 *
-	 * 將頁面導向views/admin/view_user_logs.php，觀看所有使用者log的頁面，
-	 *
+	 * 將頁面導向views/admin/view_user_logs.php，觀看所有使用者log的頁面
 	 */
 	public function action_view_user_logs()
 	{
@@ -42,19 +38,49 @@ class Controller_Admin extends \Controller_Template
 	        Response::redirect('404');
 	    }
 	    
-	    $data['logs'] = Model_UserLog::find(array(
-	        'select' => array('*'),
-	        'order_by' => array('id' => 'desc'),
-	    ));
+	    $data = null;
+	    
+	    if (Input::method() == 'POST') {
+	        $input = Model_UserLog::forge(array(
+	            'username' => Input::post('username'),
+	            'sign_in_time' => Input::post('sign_in_time'),
+	            'sign_out_time' => Input::post('sign_out_time'),
+	        ));
+	        
+	        $conditions = null;
+	        
+	        if ($input->username != '') {
+	            $conditions[] = array('username', '=', $input->username);
+	        }
+	        
+	        if ($input->sign_in_time != '') {
+	            $conditions[] = array('sign_in_time', 'like', '%'.$input->sign_in_time.'%');
+	        }
+	        
+	        if ($input->sign_out_time != '') {
+	            $conditions[] = array('sign_out_time', 'like', '%'.$input->sign_out_time.'%');
+	        }
+	        
+	        $data['logs'] = Model_UserLog::find(array(
+	            'select' => array('*'),
+	            'where' => $conditions,
+	            'order_by' => array(
+	                'id' => 'desc',
+	            ),
+	        ));
+	    } else {
+	        $data['logs'] = Model_UserLog::find(array(
+	            'select' => array('*'),
+	            'order_by' => array('id' => 'desc'),
+	        ));
+	    }
 	    
 	    $this->template->title = "Admin >> View User Logs";
 	    $this->template->content = View::forge('admin/view_user_logs', $data);
 	}
 	
 	/**
-	 *
-	 * 將頁面導向views/admin/view_message_logs.php，觀看所有訊息log的頁面，
-	 *
+	 * 將頁面導向views/admin/view_message_logs.php，觀看所有訊息log的頁面
 	 */
 	public function action_view_message_logs()
 	{
@@ -103,14 +129,37 @@ class Controller_Admin extends \Controller_Template
 	        
 	        exit; //debug test */
 	        
+	        $conditions = null;
+	        
+	        if ($input->time != '') {
+	            $conditions[] = array('time', 'like', '%'.$input->time.'%');
+	        }
+	        
+	        if ($input->username != '') {
+	            $conditions[] = array('username', '=', $input->username);
+	        }
+	        
+	        if ($input->action != '') {
+	            $conditions[] = array('action', '=', $input->action);
+	        }
+	        
+	        if ($input->is_succeed != '') {
+	            $conditions[] = array('is_succeed', '=', $input->is_succeed);
+	        }
+	        
+	        /* echo '<pre>'; print_r($conditions);
+	        
+	        exit; */
+	        
 	        $data['logs'] = Model_MessageLog::find(array(
 	            'select' => array('*'),
-	            'where' => array(
+	            'where' => $conditions,
+	            /* 'where' => array(
 	                //array('time', 'like', '%'.$input->time.'%'),
 	                array('username', '=', $input->username),
 	                array('action', '=', $input->action),
 	                //array('is_succeed', '=', $input->is_succeed),
-	            ),
+	            ), */
 	            'order_by' => array(
 	                'id' => 'desc',
 	            ),
@@ -131,9 +180,7 @@ class Controller_Admin extends \Controller_Template
 	}
 	
 	/**
-	 *
-	 * 將頁面導向views/admin/view_logs.php，搜尋log的頁面，
-	 *
+	 * 將頁面導向views/admin/view_logs.php，搜尋log的頁面
 	 */
 	/* public function action_find_logs()
 	{
@@ -150,10 +197,8 @@ class Controller_Admin extends \Controller_Template
 	} */
 	
 	/**
-	 *
 	 * 將頁面導向views/admin/create_user.php，若未建立新使用者時顯示建立新使用者的頁面，
 	 * 若使用者名稱或密碼長度不足時顯示錯誤訊息
-	 *
 	 */
 	public function action_create_user()
 	{
@@ -218,9 +263,7 @@ class Controller_Admin extends \Controller_Template
 	}
 	
 	/**
-	 *
 	 * 刪除所選的使用者
-	 *
 	 */
 	public function action_delete_user($id = null)
 	{
@@ -242,9 +285,7 @@ class Controller_Admin extends \Controller_Template
 	}
 	
 	/**
-	 *
 	 * 將頁面導向views/admin/view_message.php，內容為顯示在留言版上的單一訊息
-	 *
 	 */
 	public function action_view_message($id = null)
 	{
@@ -265,10 +306,8 @@ class Controller_Admin extends \Controller_Template
 	}
 	
 	/**
-	 *
 	 * 將頁面導向views/admin/create_message.php，若未建立新訊息時顯示建立新訊息的頁面，
 	 * 若使用者建立的標題或訊息長度不足時顯示錯誤訊息
-	 *
 	 */
 	public function action_create_message()
 	{
@@ -289,21 +328,15 @@ class Controller_Admin extends \Controller_Template
 	            ));
 	            
 	            if ($message && $message->save()) {
-	                $log_create = Model_MessageLog::forge(array(
-	                    'username' => Session::get('username'),
-	                    'action' => 'C',
-	                    'before_title' => '',
-	                    'after_title' => Input::post('title'),
-	                    'before_message' => '',
-	                    'after_message' => Input::post('message'),
-	                    'is_succeed' => '1',
-	                ));
-	                
-	                if ($log_create && $log_create->save()) {
-	                    Session::set_flash('success', 'Added log # '.$log_create->id.'.');
-	                } else {
-	                    Session::set_flash('error', 'Could not save log.');
-	                }
+	                Model_MessageLog::save_log(
+	                    Session::get('username'),
+	                    'C',
+	                    '',
+	                    Input::post('title'),
+	                    '',
+	                    Input::post('message'),
+	                    '1'
+	                );
 	                
 	                Session::set_flash('success', 'Added message # '.$message->id.'.');
 	                
@@ -312,21 +345,15 @@ class Controller_Admin extends \Controller_Template
 	                Session::set_flash('error', 'Could not save message.');
 	            }
 	        } else {
-	            $log_create = Model_MessageLog::forge(array(
-	                'username' => Session::get('username'),
-	                'action' => 'C',
-	                'before_title' => '',
-	                'after_title' => Input::post('title'),
-	                'before_message' => '',
-	                'after_message' => Input::post('message'),
-	                'is_succeed' => '0',
-	            ));
-	            
-	            if ($log_create && $log_create->save()) {
-	                Session::set_flash('success', 'Added log # '.$log_create->id.'.');
-	            } else {
-	                Session::set_flash('error', 'Could not save log.');
-	            }
+	            Model_MessageLog::save_log(
+	                Session::get('username'),
+	                'C',
+	                '',
+	                Input::post('title'),
+	                '',
+	                Input::post('message'),
+	                '0'
+	            );
 	            
 	            $is_title_or_message_too_short = true;
 	            
@@ -344,9 +371,7 @@ class Controller_Admin extends \Controller_Template
 	}
 	
 	/**
-	 *
 	 * 將頁面導向views/admin/edit_message.php，修改一則所選的訊息
-	 *
 	 */
 	public function action_edit_message($id = null)
 	{
@@ -377,21 +402,15 @@ class Controller_Admin extends \Controller_Template
             $message->message = Input::post('message');
 	        
 	        if ($message->save()) {
-	            $log_update = Model_MessageLog::forge(array(
-	                'username' => Session::get('username'),
-	                'action' => 'U',
-	                'before_title' => $before_title,
-	                'after_title' => Input::post('title'),
-	                'before_message' => $before_message,
-	                'after_message' => Input::post('message'),
-	                'is_succeed' => '1',
-	            ));
-	            
-	            if ($log_update && $log_update->save()) {
-	                Session::set_flash('success', 'Added log # '.$log_update->id.'.');
-	            } else {
-	                Session::set_flash('error', 'Could not save log.');
-	            }
+	            Model_MessageLog::save_log(
+	                Session::get('username'),
+	                'U',
+	                $before_title,
+	                Input::post('title'),
+	                $before_message,
+	                Input::post('message'),
+	                '1'
+	            );
 	            
 	            Session::set_flash('success', 'Updated message # '. $id);
 	            
@@ -400,21 +419,15 @@ class Controller_Admin extends \Controller_Template
 	            Session::set_flash('error', 'Could not update message # '. $id);
 	        }
 	    } else {
-	        $log_update = Model_MessageLog::forge(array(
-	            'username' => Session::get('username'),
-	            'action' => 'U',
-	            'before_title' => $before_title,
-	            'after_title' => Input::post('title'),
-	            'before_message' => $before_message,
-	            'after_message' => Input::post('message'),
-	            'is_succeed' => '0',
-	        ));
-	        
-	        if ($log_update && $log_update->save()) {
-	            Session::set_flash('success', 'Added log # '.$log_update->id.'.');
-	        } else {
-	            Session::set_flash('error', 'Could not save log.');
-	        }
+	        Model_MessageLog::save_log(
+	            Session::get('username'),
+	            'U',
+	            $before_title,
+	            Input::post('title'),
+	            $before_message,
+	            Input::post('message'),
+	            '0'
+	        );
 	        
 	        if (Input::method() == 'POST') {
 	            $message->title = $val->validated('title');
@@ -438,9 +451,7 @@ class Controller_Admin extends \Controller_Template
 	}
 	
 	/**
-	 *
 	 * 刪除一則所選的訊息
-	 *
 	 */
 	public function action_delete_message($id = null)
 	{
@@ -451,32 +462,26 @@ class Controller_Admin extends \Controller_Template
 	    is_null($id) and Response::redirect('admin');
 	    
 	    if ($message = Model_Message::find_by_pk($id)) {
-	        $log_delete = Model_MessageLog::forge(array(
-	            'username' => Session::get('username'),
-	            'action' => 'D',
-	            'before_title' => $message->title,
-	            'after_title' => '',
-	            'before_message' => $message->message,
-	            'after_message' => '',
-	            'is_succeed' => '1',
-	        ));
+	        $is_log_save_successfully = Model_MessageLog::save_log(
+	            Session::get('username'),
+	            'D',
+	            $message->title,
+	            '',
+	            $message->message,
+	            '',
+	            '1'
+	        );
 	        
-	        if ($log_delete && $log_delete->save()) {
-	            Session::set_flash('success', 'Added log # '.$log_delete->id.'.');
-	        } else {
-	            $log_delete = Model_MessageLog::forge(array(
-	                'username' => Session::get('username'),
-	                'action' => 'D',
-	                'before_title' => $message->title,
-	                'after_title' => '',
-	                'before_message' => $message->message,
-	                'after_message' => '',
-	                'is_succeed' => '0',
-	            ));
-	        
-	            $log_delete->save();
-	        
-	            Session::set_flash('error', 'Could not save log.');
+	        if ( ! $is_log_save_successfully) {
+	            Model_MessageLog::save_log(
+	                Session::get('username'),
+	                'D',
+	                $message->title,
+	                '',
+	                $message->message,
+	                '',
+	                '0'
+	            );
 	        }
 	        
 	        $message->delete();

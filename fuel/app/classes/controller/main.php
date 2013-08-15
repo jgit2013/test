@@ -9,9 +9,7 @@
 class Controller_Main extends \Controller_Template
 {
     /**
-     * 
      * 將頁面導向views/main/index.php，內容為主要的頁面，可選擇登入或建立新的使用者
-     * 
      */
     public function action_index()
     {
@@ -26,10 +24,8 @@ class Controller_Main extends \Controller_Template
     }
     
     /**
-     *
      * 將頁面導向views/main/login.php，若未登入時顯示登入頁面， 
      * 若使用者名稱或密碼錯誤時顯示錯誤訊息
-     *
      */
     public function action_login()
     {
@@ -56,7 +52,8 @@ class Controller_Main extends \Controller_Template
                     ));
                     
                     if ( ! is_null($data['users'])) {
-                        //this place
+                        Session::set('sign_in_time', time());
+                        Session::set('sign_in_time_date', date("Y-m-d H:i:s"));
                         
                         Session::set('user_id', $data['users'][0]->id);
                         Session::set('username', $login->username);
@@ -102,13 +99,26 @@ class Controller_Main extends \Controller_Template
     }
     
     /**
-     *
      * 登出使用者並銷毀該次的Session物件
-     *
      */
     public function action_logout()
     {
         $username = Session::get('username');
+        
+        $sign_in_time_date = Session::get('sign_in_time_date');
+        $sign_out_time_date = date("Y-m-d H:i:s");
+        
+        $sign_in_time = (int) Session::get('sign_in_time');
+        $sign_out_time = time();
+        
+        $during = Model_UserLog::time_elapsed($sign_out_time - $sign_in_time);
+        
+       Model_UserLog::save_log(
+            $username,
+            $sign_in_time_date,
+            $sign_out_time_date,
+            $during
+        );
         
         Session::destroy();
         
@@ -118,10 +128,8 @@ class Controller_Main extends \Controller_Template
     }
     
     /**
-     *
      * 將頁面導向views/main/create_user.php，若未建立新使用者時顯示建立新使用者的頁面， 
      * 若使用者名稱或密碼長度不足時顯示錯誤訊息
-     *
      */
     public function action_create_user()
     {
@@ -184,9 +192,7 @@ class Controller_Main extends \Controller_Template
     }
     
     /**
-     *
      * 將頁面導向views/main/go.php
-     *
      */
     public function action_go()
     {

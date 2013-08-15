@@ -71,4 +71,42 @@ class Model_MessageLog extends \Model_Crud
 	    
 	    return $val;
 	}
+	
+	/**
+	 * 儲存訊息的log
+	 *
+	 * @param  string  $username 使用者名稱
+	 * @param  string  $action 動作('C'表示建立訊息，'U'表示更新訊息，'D'表示刪除訊息)
+	 * @param  string  $before_title 儲存前的標題
+	 * @param  string  $after_title 儲存後的標題
+	 * @param  string  $before_message 儲存前的訊息
+	 * @param  string  $after_message 儲存後的訊息
+	 * @param  string  $is_succeed 是否儲存成功('1'表示成功，'0'表示失敗)
+	 * @return  boolean  是否儲存成功，成功回傳true，失敗則回傳false
+	 */
+	public static function save_log(
+	    $username,
+	    $action,
+	    $before_title,
+	    $after_title,
+	    $before_message,
+	    $after_message,
+	    $is_succeed
+	) {
+	    $message_log = Model_MessageLog::forge(array(
+	        'username' => $username,
+	        'action' => $action,
+	        'before_title' => $before_title,
+	        'after_title' => $after_title,
+	        'before_message' => $before_message,
+	        'after_message' => $after_message,
+	        'is_succeed' => $is_succeed,
+	    ));
+	
+	    if ($message_log && $message_log->save()) {
+	        return true;
+	    } else {
+	        return false;
+	    }
+	}
 }

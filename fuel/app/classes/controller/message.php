@@ -9,18 +9,12 @@
 class Controller_Message extends \Controller_Template
 {
     /**
-     *
      * 將頁面導向views/message/index.php，內容為留言版的頁面，
      * 除了可以建立新的訊息外，也可選擇觀看自己或其他人建立的訊息，
      * 且修改或刪除自己留的訊息 ，而訊息排列方式會由最新的訊息排到最舊的訊息
-     * 
      */
     public function action_index()
     {
-        /* if (is_null(Session::get('is_login')) && (Session::get('is_login') == 'False')) {
-            Response::redirect('login');
-        } */
-        
         is_null(Session::get('is_login')) and Response::redirect('404');
         
         $data['messages'] = Model_Message::find(array(
@@ -37,9 +31,7 @@ class Controller_Message extends \Controller_Template
     }
     
     /**
-     *
      * 將頁面導向views/message/view.php，內容為顯示在留言版上的單一訊息
-     *
      */
     public function action_view($id = null)
     {
@@ -58,10 +50,8 @@ class Controller_Message extends \Controller_Template
     }
     
     /**
-     *
      * 將頁面導向views/main/create.php，若未建立新訊息時顯示建立新訊息的頁面，
      * 若使用者建立的標題或訊息長度不足時顯示錯誤訊息
-     *
      */
     public function action_create()
     {
@@ -80,21 +70,15 @@ class Controller_Message extends \Controller_Template
                 ));
                 
                 if ($message && $message->save()) {
-                    $log_create = Model_MessageLog::forge(array(
-                        'username' => Session::get('username'),
-                        'action' => 'C',
-                        'before_title' => '',
-                        'after_title' => Input::post('title'),
-                        'before_message' => '',
-                        'after_message' => Input::post('message'),
-                        'is_succeed' => '1',
-                    ));
-                    
-                    if ($log_create && $log_create->save()) {
-                        Session::set_flash('success', 'Added log # '.$log_create->id.'.');
-                    } else {
-                        Session::set_flash('error', 'Could not save log.');
-                    }
+                    Model_MessageLog::save_log(
+                        Session::get('username'),
+                        'C',
+                        '',
+                        Input::post('title'),
+                        '',
+                        Input::post('message'),
+                        '1'
+                    );
                     
                     Session::set_flash('success', 'Added message # '.$message->id.'.');
                     
@@ -103,21 +87,15 @@ class Controller_Message extends \Controller_Template
                     Session::set_flash('error', 'Could not save message.');
                 }
             } else {
-                $log_create = Model_MessageLog::forge(array(
-                    'username' => Session::get('username'),
-                    'action' => 'C',
-                    'before_title' => '',
-                    'after_title' => Input::post('title'),
-                    'before_message' => '',
-                    'after_message' => Input::post('message'),
-                    'is_succeed' => '0',
-                ));
-                
-                if ($log_create && $log_create->save()) {
-                    Session::set_flash('success', 'Added log # '.$log_create->id.'.');
-                } else {
-                    Session::set_flash('error', 'Could not save log.');
-                }
+                Model_MessageLog::save_log(
+                    Session::get('username'),
+                    'C',
+                    '',
+                    Input::post('title'),
+                    '',
+                    Input::post('message'),
+                    '0'
+                );
                 
                 $is_title_or_message_too_short = true;
                 
@@ -135,9 +113,7 @@ class Controller_Message extends \Controller_Template
     }
     
     /**
-     *
      * 將頁面導向views/main/edit.php，修改一則該使用者自己建立的訊息
-     *
      */
     public function action_edit($id = null)
     {
@@ -166,21 +142,15 @@ class Controller_Message extends \Controller_Template
             $message->message = Input::post('message');
             
             if ($message->save()) {
-                $log_update = Model_MessageLog::forge(array(
-                    'username' => Session::get('username'),
-                    'action' => 'U',
-                    'before_title' => $before_title,
-                    'after_title' => Input::post('title'),
-                    'before_message' => $before_message,
-                    'after_message' => Input::post('message'),
-                    'is_succeed' => '1',
-                ));
-                
-                if ($log_update && $log_update->save()) {
-                    Session::set_flash('success', 'Added log # '.$log_update->id.'.');
-                } else {
-                    Session::set_flash('error', 'Could not save log.');
-                }
+                Model_MessageLog::save_log(
+                    Session::get('username'),
+                    'U',
+                    $before_title,
+                    Input::post('title'),
+                    $before_message,
+                    Input::post('message'),
+                    '1'
+                );
                 
                 Session::set_flash('success', 'Updated message # ' . $id);
                 
@@ -189,21 +159,15 @@ class Controller_Message extends \Controller_Template
                 Session::set_flash('error', 'Could not update message # ' . $id);
             }
         } else {
-            $log_update = Model_MessageLog::forge(array(
-                'username' => Session::get('username'),
-                'action' => 'U',
-                'before_title' => $before_title,
-                'after_title' => Input::post('title'),
-                'before_message' => $before_message,
-                'after_message' => Input::post('message'),
-                'is_succeed' => '0',
-            ));
-            
-            if ($log_update && $log_update->save()) {
-                Session::set_flash('success', 'Added log # '.$log_update->id.'.');
-            } else {
-                Session::set_flash('error', 'Could not save log.');
-            }
+            Model_MessageLog::save_log(
+                Session::get('username'),
+                'U',
+                $before_title,
+                Input::post('title'),
+                $before_message,
+                Input::post('message'),
+                '0'
+            );
             
             if (Input::method() == 'POST') {
                 $message->title = $val->validated('title');
@@ -227,9 +191,7 @@ class Controller_Message extends \Controller_Template
     }
     
     /**
-     *
      * 刪除一則該使用者自己建立的訊息
-     *
      */
     public function action_delete($id = null)
     {
@@ -238,32 +200,26 @@ class Controller_Message extends \Controller_Template
         is_null($id) and Response::redirect('message');
         
         if ($message = Model_Message::find_by_pk($id)) {
-            $log_delete = Model_MessageLog::forge(array(
-                'username' => Session::get('username'),
-                'action' => 'D',
-                'before_title' => $message->title,
-                'after_title' => '',
-                'before_message' => $message->message,
-                'after_message' => '',
-                'is_succeed' => '1',
-            ));
+            $is_log_save_successfully = Model_MessageLog::save_log(
+                Session::get('username'),
+                'D',
+                $message->title,
+                '',
+                $message->message,
+                '',
+                '1'
+            );
             
-            if ($log_delete && $log_delete->save()) {
-                Session::set_flash('success', 'Added log # '.$log_delete->id.'.');
-            } else {
-                $log_delete = Model_MessageLog::forge(array(
-                    'username' => Session::get('username'),
-                    'action' => 'D',
-                    'before_title' => $message->title,
-                    'after_title' => '',
-                    'before_message' => $message->message,
-                    'after_message' => '',
-                    'is_succeed' => '0',
-                ));
-                
-                $log_delete->save();
-                
-                Session::set_flash('error', 'Could not save log.');
+            if ( ! $is_log_save_successfully) {
+                Model_MessageLog::save_log(
+                    Session::get('username'),
+                    'D',
+                    $message->title,
+                    '',
+                    $message->message,
+                    '',
+                    '0'
+                );
             }
             
             $message->delete();
