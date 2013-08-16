@@ -17,15 +17,6 @@
 		</div>
 		
 		<div class="control-group">
-			<?php echo Form::label('Captcha', 'captcha', array('class'=>'control-label')); ?>
-
-			<div class="controls">
-				<?php echo Captcha::forge('simplecaptcha')->html(); ?>
-				<?php //echo Captcha::forge('recaptcha')->html(); ?>
-			</div>
-		</div>
-		
-		<div class="control-group">
 			<label class='control-label'>&nbsp;</label>
 			<div class='controls'>
 				<?php echo Form::submit('submit', 'Sign in', array('class' => 'btn btn-primary')); ?>

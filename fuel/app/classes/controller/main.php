@@ -29,72 +29,97 @@ class Controller_Main extends \Controller_Template
      */
     public function action_login()
     {
-        $is_incorrect_username_or_password = false;
+        $is_username_or_password_incorrect = false;
+        $is_captcha_incorrect = false;
         
         if (Input::method() == 'POST') {
+            //$is_captcha_incorrect = Captcha::forge()->check();
+            
+            /* if ( ! $is_captcha_incorrect) {
+                
+            } */
+            
             $val = Model_User::validate('sign_in');
             
             if ($val->run()) {
                 $login = Model_User::forge(array(
                     'username' => Input::post('username'),
-                    'password' => Input::post('password'),
+                    'password' => Input::post('password')
                 ));
                 
-                //echo $login->username.' '.$login->password.'<br/>'; //debug test
+                // echo $login->username.' '.$login->password.'<br/>'; //debug test
                 
                 if ($login) {
                     $data['users'] = Model_User::find(array(
                         'select' => array('id', 'username', 'password', 'is_admin'),
                         'where' => array(
-                            array('username', '=', $login->username,),
-                            array('password', '=', $login->password,),
-                        ),
+                            array('username', '=', $login->username),
+                            array('password', '=', $login->password)
+                        )
                     ));
                     
-                    if ( ! is_null($data['users'])) {
-                        Session::set('sign_in_time', time());
-                        Session::set('sign_in_time_date', date("Y-m-d H:i:s"));
+                    if (! is_null($data['users'])) {
+                        $is_captcha_incorrect = Captcha::forge()->check();
                         
-                        Session::set('user_id', $data['users'][0]->id);
-                        Session::set('username', $login->username);
-                        Session::set('is_login', 'True');
-                        
-                        //echo '<pre>'; var_dump($data); //debug test
-                        //echo $data['users'][0]->username.' '.$data['users'][0]->password.'<br/>'; //debug test
-                        //echo Session::get('username').' '.Session::get('is_admin').'<br/>'; //debug test
-                        
-                        if ($data['users'][0]->is_admin == 1) {
-                            Session::set('is_admin', '1');
-                            
-                            Response::redirect('admin');
+                        if ($is_captcha_incorrect) {
+                            echo 'Yes';
                         } else {
-                            Session::set('is_admin', '0');
+                            echo 'No';
+                        }
+                        
+                        exit;
+                        
+                        if ( ! $is_captcha_incorrect) {
+                            Session::set('sign_in_time', time());
+                            Session::set('sign_in_time_date', date("Y-m-d H:i:s"));
                             
-                            Response::redirect('message');
+                            Session::set('user_id', $data['users'][0]->id);
+                            Session::set('username', $login->username);
+                            Session::set('is_login', 'True');
+                            
+                            // echo '<pre>'; var_dump($data); //debug test
+                            // echo $data['users'][0]->username.' '.$data['users'][0]->password.'<br/>'; //debug test
+                            // echo Session::get('username').' '.Session::get('is_admin').'<br/>'; //debug test
+                            
+                            if ($data['users'][0]->is_admin == 1) {
+                                Session::set('is_admin', '1');
+                                
+                                Response::redirect('admin');
+                            } else {
+                                Session::set('is_admin', '0');
+                                
+                                Response::redirect('message');
+                            }
                         }
                     } else {
-                        //echo '<pre>'; var_dump($data); //debug test
-                        
-                        $is_incorrect_username_or_password = true;
-                        
-                        //Response::redirect('main');
+                        $is_username_or_password_incorrect = true;
                     }
                 } else {
                     Session::set_flash('error', 'Could not login.');
                 }
             } else {
-                $is_incorrect_username_or_password = true;
+                $is_username_or_password_incorrect = true;
                 
                 Session::set_flash('error', $val->error());
             }
         }
         
-        if ($is_incorrect_username_or_password) {
+        if ($is_username_or_password_incorrect) {
             $this->template->title = "Incorrect Username Or Password";
             $this->template->content = View::forge('main/login');
         } else {
-            $this->template->title = "Sign In (Admin User: Username=admin, Password=admin)";
-            $this->template->content = View::forge('main/login');
+            /* if (Input::method() == 'POST') {
+                $is_captcha_incorrect = Captcha::forge()->check();
+            } */
+            
+            if ($is_captcha_incorrect) {
+                $this->template->title = "The Captcha is Incorrect";
+                $this->template->content = View::forge('main/login');
+            }
+            else {
+                $this->template->title = "Sign In (Admin User: Username=admin, Password=admin)";
+                $this->template->content = View::forge('main/login');
+            }
         }
     }
     
@@ -135,6 +160,7 @@ class Controller_Main extends \Controller_Template
     {
         $is_username_in_use = false;
         $is_username_or_password_too_short = false;
+        $is_captcha_incorrect = false;
         
         if (Input::method() == 'POST') {
             $val = Model_User::validate('create_user');
@@ -159,7 +185,7 @@ class Controller_Main extends \Controller_Template
                     }
                 }
                 
-                if ( ! $is_username_in_use) {
+                if ( ! $is_username_in_use && $is_captcha_incorrect) {
                     if ($input and $input->save()) {
                         Session::set_flash('success', 'Added user # '.$input->id.'.');
                         
@@ -198,5 +224,10 @@ class Controller_Main extends \Controller_Template
     {
         $this->template->title = "Create Successfully, Please Sign In";
         $this->template->content = View::forge('main/go');
+    }
+    
+    public function action_simplecaptcha()
+    {
+        return Captcha::forge('simplecaptcha')->image();
     }
 }
