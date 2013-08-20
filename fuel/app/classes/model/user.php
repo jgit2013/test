@@ -58,4 +58,66 @@ class Model_User extends \Model_Crud
 		
 		return $val;
 	}
+	
+	public static function check_user_in_use(
+	    $username,
+	    $password
+	) {
+	    $val = Model_User::validate('new_user');
+	    
+	    if ( ! $val->run()) {
+	        return 'ERROR';
+	        
+	        
+	        
+	        /* $input = Model_User::forge(array(
+	            'username' => Input::post('username'),
+	            'password' => Input::post('password'),
+	        ));
+	    
+	        $users = Model_User::find(array(
+	            'select' => array('username'),
+	        ));
+	    
+	        foreach ($users as $user) {
+	            if ($input->username == $user->username) {
+	                $is_username_in_use = true;
+	    
+	                break;
+	            }
+	        }
+	    
+	        if ( ! $is_username_in_use) {
+	            if ($input and $input->save()) {
+	                Session::set_flash('success', 'Added user # '.$input->id.'.');
+	    
+	                Response::redirect('admin');
+	            } else {
+	                Session::set_flash('error', 'Could not save user.');
+	            }
+	        } */
+	    } else {
+	        $user = Model_User::find(array(
+	            'select' => array('username'),
+	            'where' => array(
+	                array('username', '=', $username),
+	            ),
+	        ));
+	        
+	        if ( ! is_null($user)) {
+	            return 'IN USE';
+	        }
+	        
+	        $password = md5($password);
+	        
+	        $new_user = Model_User::forge(array(
+	            'username' => $username,
+	            'password' => $password,
+	        ));
+	        
+	        $new_user->save();
+	        
+	        return false;
+	    }
+	}
 }

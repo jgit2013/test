@@ -4,7 +4,7 @@
 			<?php echo Form::label('IP Address', 'ip_address', array('class'=>'control-label')); ?>
 
 			<div class="controls">
-				<?php echo Form::input('ip_address', Input::post('ip_address', isset($log) ? $log->ip_address : ''), array('class' => 'span4', 'placeholder'=>'Ip Address')); ?>
+				<?php echo Form::input('ip_address', Input::post('ip_address', isset($log) ? $log->ip_address : ''), array('class' => 'span4', 'placeholder'=>'IP Address')); ?>
 			</div>
 		</div>
 		

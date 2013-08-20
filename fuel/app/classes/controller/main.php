@@ -16,11 +16,13 @@ class Controller_Main extends \Controller_Template
      */
     public function action_index()
     {
-       /*  Session::destroy();
-        
-        if ( ! is_null(Session::get('is_sign_in')) && (Session::get('is_sign_in') == 'True')) {
-            Response::redirect('message');
-        } */
+        if ( ! is_null(Session::get('is_sign_in'))) {
+            if (Session::get('is_admin') == '1') {
+                Response::redirect('admin');
+            } else {
+                Response::redirect('message');
+            }
+        }
         
         $this->template->title = "Main Page";
         $this->template->content = View::forge('main/index');
@@ -33,8 +35,6 @@ class Controller_Main extends \Controller_Template
      */
     public function action_sign_in()
     {
-        date_default_timezone_set('Asia/Taipei');
-        
         $is_username_or_password_incorrect = false;
         $is_captcha_incorrect = false;
         
@@ -62,15 +62,12 @@ class Controller_Main extends \Controller_Template
                         if ( ! $is_captcha_incorrect) {
                             Session::set('ip_address', Input::real_ip());
                             
-                            Session::set('sign_in_time', time());
-                            Session::set('sign_in_timestamp', date("Y-m-d H:i:s"));
+                            $date = Date::forge();
                             
-                            /* $date = Date::forge();
+                            $date->set_timezone('Asia/Taipei');
                             
-                            $date::set_timezone('Asia/Taipei');
-                            
-                            Session::set('sign_in_time', $date::time());
-                            Session::set('sign_in_timestamp', $date::format("%Y-%m-%d %H:%M:%s")); */
+                            Session::set('sign_in_timestamp', $date->get_timestamp());
+                            Session::set('sign_in_time', $date->format('%Y-%m-%d %H:%M:%S'));
                             
                             Session::set('user_id', $data['users'][0]->id);
                             Session::set('username', $sign_in->username);
@@ -125,35 +122,27 @@ class Controller_Main extends \Controller_Template
      */
     public function action_sign_out()
     {
-        date_default_timezone_set('Asia/Taipei');
-        
         $ip_address = Session::get('ip_address');
         
         $username = Session::get('username');
         
-        $sign_in_timestamp = Session::get('sign_in_timestamp');
-        $sign_out_timestamp = date("Y-m-d H:i:s");
+        $date = Date::forge();
         
-        /* $date = Date::forge();
+        $date->set_timezone('Asia/Taipei');
         
-        $date::set_timezone('Asia/Taipei');
+        $sign_in_time = Session::get('sign_in_time');
+        $sign_out_time = $date->format('%Y-%m-%d %H:%M:%S');
         
-        $sign_in_timestamp = Session::get('sign_in_timestamp');
-        $sign_out_timestamp = $date::format("%Y-%m-%d %H:%M:%s"); */
+        $sign_in_timestamp = (int) Session::get('sign_in_timestamp');
+        $sign_out_timestamp = $date->get_timestamp();
         
-        $sign_in_time = (int) Session::get('sign_in_time');
-        $sign_out_time = time();
-        
-        /* $sign_in_time = (int) Session::get('sign_in_time');
-        $sign_out_time = $date::time(); */
-        
-        $during = Model_UserLog::time_elapsed($sign_out_time - $sign_in_time);
+        $during = Model_UserLog::time_elapsed($sign_out_timestamp - $sign_in_timestamp);
         
         Model_UserLog::save_log(
             $ip_address,
             $username,
-            $sign_in_timestamp,
-            $sign_out_timestamp,
+            $sign_in_time,
+            $sign_out_time,
             $during
         );
         
@@ -170,12 +159,8 @@ class Controller_Main extends \Controller_Template
      */
     public function action_create_user()
     {
-        $is_username_in_use = false;
-        $is_username_or_password_too_short = false;
-        $is_captcha_incorrect = false;
-        
-        if (Input::method() == 'POST') {
-            $val = Model_User::validate('create_user');
+        /*if (Input::method() == 'POST') {
+             $val = Model_User::validate('create_user');
             
             if ($val->run()) {
                 $input = Model_User::forge(array(
@@ -211,11 +196,48 @@ class Controller_Main extends \Controller_Template
                 
                 Session::set_flash('error', $val->error());
             }
+        } */
+        
+        $is_captcha_incorrect = false;
+        $is_username_in_use = false;
+        $is_username_or_password_too_short = false;
+        
+        if (Input::method() == 'POST') {
+            $is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
+            
+            if ( ! $is_captcha_incorrect) {
+                $check_user_in_use = Model_User::check_user_in_use(
+                    Input::post('username'),
+                    Input::post('password')
+                );
+                
+                if ($check_user_in_use == 'ERROR') {
+                    $is_username_or_password_too_short = true;
+                } else if ($check_user_in_use == 'IN USE') {
+                    $is_username_in_use = true;
+                } else {
+                    Response::redirect('main/go');
+                }
+            }
         }
         
         $this->template->set_global('captcha_driver', $this->captcha_driver, false);
         
-        if ($is_username_in_use) {
+        if ($is_captcha_incorrect || $is_username_or_password_too_short) {
+            $this->template->title = "Create A New User >> Your Username Should Be At Least \"1\" Character,
+                                                     And Your Password Should Be At Least \"4\" Characters";
+            $this->template->content = View::forge('main/create_user');
+        } else {
+            if ($is_username_in_use) {
+                $this->template->title = "Create A New User >> Your Username Is Already In Use";
+                $this->template->content = View::forge('main/create_user');
+            } else {
+                $this->template->title = "Create A New User";
+                $this->template->content = View::forge('main/create_user');
+            }
+        }
+        
+        /* if ($is_username_in_use) {
             $this->template->title = "Create A New User >> Your Username Is Already In Use";
             $this->template->content = View::forge('main/create_user');
         } else {
@@ -234,7 +256,7 @@ class Controller_Main extends \Controller_Template
                     $this->template->content = View::forge('main/create_user');
                 }
             }
-        }
+        } */
     }
     
     /**
