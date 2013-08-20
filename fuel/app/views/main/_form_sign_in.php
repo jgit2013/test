@@ -4,7 +4,7 @@
             <?php echo Form::label('Username', 'username', array('class'=>'control-label')); ?>
             
             <div class="controls">
-                <?php echo Form::input('username', Input::post('username', isset($create) ? $create->username : ''), array('class' => 'span4', 'placeholder'=>'Username')); ?>
+                <?php echo Form::input('username', Input::post('username', isset($sign_in) ? $sign_in->username : ''), array('class' => 'span4', 'placeholder'=>'Username')); ?>
             </div>
         </div>
         
@@ -12,7 +12,7 @@
             <?php echo Form::label('Password', 'password', array('class'=>'control-label')); ?>
             
             <div class="controls">
-                <?php echo Form::password('password', Input::post('password', isset($create) ? $create->password : ''), array('class' => 'span4', 'placeholder'=>'Password')); ?>
+                <?php echo Form::password('password', Input::post('password', isset($sign_in) ? $sign_in->password : ''), array('class' => 'span4', 'placeholder'=>'Password')); ?>
             </div>
         </div>
         
@@ -32,7 +32,7 @@
             <label class='control-label'>&nbsp;</label>
             
             <div class='controls'>
-                <?php echo Form::submit('submit', 'Create', array('class' => 'btn btn-primary')); ?>
+                <?php echo Form::submit('submit', 'Sign in', array('class' => 'btn btn-primary')); ?>
             </div>
         </div>
     </fieldset>

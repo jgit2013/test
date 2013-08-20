@@ -3,7 +3,7 @@
  * Admin Controller class
  *
  * 管理者登入後留言版操作頁面的Controller
- *
+ * 
  * @author    J
  */
 class Controller_Admin extends \Controller_Template
@@ -15,7 +15,7 @@ class Controller_Admin extends \Controller_Template
      */
 	public function action_index()
 	{
-	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
 	        Response::redirect('404');
 	    }
 	    
@@ -25,7 +25,7 @@ class Controller_Admin extends \Controller_Template
 		    'order_by' => array('id' => 'desc'),
 		));
 		
-		$this->template->title = "Hello, \"".Session::get('username')."\" Here Are All The Users And Messages";
+		$this->template->title = "Admin >> Control Panel";
 		$this->template->content = View::forge('admin/index', $data);
 	}
 	
@@ -34,7 +34,7 @@ class Controller_Admin extends \Controller_Template
 	 */
 	public function action_view_user_logs()
 	{
-	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
 	        Response::redirect('404');
 	    }
 	    
@@ -43,11 +43,16 @@ class Controller_Admin extends \Controller_Template
 	    if (Input::method() == 'POST') {
 	        $input = Model_UserLog::forge(array(
 	            'username' => Input::post('username'),
+	            'ip_address' => Input::post('ip_address'),
 	            'sign_in_time' => Input::post('sign_in_time'),
 	            'sign_out_time' => Input::post('sign_out_time'),
 	        ));
 	        
 	        $conditions = null;
+	        
+	        if ($input->ip_address != '') {
+	            $conditions[] = array('ip_address', 'like', '%'.$input->ip_address.'%');
+	        }
 	        
 	        if ($input->username != '') {
 	            $conditions[] = array('username', '=', $input->username);
@@ -84,7 +89,7 @@ class Controller_Admin extends \Controller_Template
 	 */
 	public function action_view_message_logs()
 	{
-	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
 	        Response::redirect('404');
 	    }
 	    
@@ -95,6 +100,10 @@ class Controller_Admin extends \Controller_Template
 	            'time' => Input::post('time'),
 	            'username' => Input::post('username'),
 	            'action' => Input::post('action'),
+	            'before_title' => Input::post('before_title'),
+	            'after_title' => Input::post('after_title'),
+	            'before_message' => Input::post('before_message'),
+	            'after_message' => Input::post('after_message'),
 	            'is_succeed' => Input::post('is_succeed'),
 	        ));
 	        
@@ -143,6 +152,22 @@ class Controller_Admin extends \Controller_Template
 	            $conditions[] = array('action', '=', $input->action);
 	        }
 	        
+	        if ($input->before_title != '') {
+	            $conditions[] = array('before_title', 'like', '%'.$input->before_title.'%');
+	        }
+	        
+	        if ($input->after_title != '') {
+	            $conditions[] = array('after_title', 'like', '%'.$input->after_title.'%');
+	        }
+	        
+	        if ($input->before_message != '') {
+	            $conditions[] = array('before_message', 'like', '%'.$input->before_message.'%');
+	        }
+	        
+	        if ($input->after_message != '') {
+	            $conditions[] = array('after_message', 'like', '%'.$input->after_message.'%');
+	        }
+	        
 	        if ($input->is_succeed != '') {
 	            $conditions[] = array('is_succeed', '=', $input->is_succeed);
 	        }
@@ -180,29 +205,13 @@ class Controller_Admin extends \Controller_Template
 	}
 	
 	/**
-	 * 將頁面導向views/admin/view_logs.php，搜尋log的頁面
-	 */
-	/* public function action_find_logs()
-	{
-	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
-	        Response::redirect('404');
-	    }
-	    
-	    if (Input::method() == 'POST') {
-	        
-	    }
-	    
-	    $this->template->title = "Admin >> View Logs";
-	    $this->template->content = View::forge('admin/view_logs');
-	} */
-	
-	/**
-	 * 將頁面導向views/admin/create_user.php，若未建立新使用者時顯示建立新使用者的頁面，
+	 * 將頁面導向views/admin/create_user.php，
+	 * 若未建立新使用者時顯示建立新使用者的頁面，
 	 * 若使用者名稱或密碼長度不足時顯示錯誤訊息
 	 */
 	public function action_create_user()
 	{
-	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
 	        Response::redirect('404');
 	    }
 	    
@@ -247,11 +256,11 @@ class Controller_Admin extends \Controller_Template
 		}
 		
 		if ($is_username_in_use) {
-		    $this->template->title = "The Username Is Already In Use";
+		    $this->template->title = "Admin >> Create User (The Username Is Already In Use)";
 		    $this->template->content = View::forge('admin/create_user');
 		} else {
 		    if ($is_username_or_password_too_short) {
-		        $this->template->title = "Admin >> Create User (Your Username Should Be At Least \"1\" Character,
+		        $this->template->title = "Admin >> Create User (The Username Should Be At Least \"1\" Character,
 		                                                  And Your Password Should Be At Least \"4\" Characters)";
 		    
 		        $this->template->content = View::forge('admin/create_user');
@@ -267,7 +276,7 @@ class Controller_Admin extends \Controller_Template
 	 */
 	public function action_delete_user($id = null)
 	{
-	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
 	        Response::redirect('404');
 	    }
 	    
@@ -289,7 +298,7 @@ class Controller_Admin extends \Controller_Template
 	 */
 	public function action_view_message($id = null)
 	{
-	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
 	        Response::redirect('404');
 	    }
 	    
@@ -306,12 +315,13 @@ class Controller_Admin extends \Controller_Template
 	}
 	
 	/**
-	 * 將頁面導向views/admin/create_message.php，若未建立新訊息時顯示建立新訊息的頁面，
+	 * 將頁面導向views/admin/create_message.php，
+	 * 若未建立新訊息時顯示建立新訊息的頁面，
 	 * 若使用者建立的標題或訊息長度不足時顯示錯誤訊息
 	 */
 	public function action_create_message()
 	{
-	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
 	        Response::redirect('404');
 	    }
 	    
@@ -375,7 +385,7 @@ class Controller_Admin extends \Controller_Template
 	 */
 	public function action_edit_message($id = null)
 	{
-	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
 	        Response::redirect('404');
 	    }
 	    
@@ -394,14 +404,35 @@ class Controller_Admin extends \Controller_Template
 	    }
 	    
 	    $is_title_or_message_too_short = false;
-	    
+
 	    $val = Model_Message::validate('edit_message');
 	    
-	    if ($val->run()) {
-	        $message->title = Input::post('title');
-            $message->message = Input::post('message');
+	    if (Input::method() == 'POST') {
+	        $val = Model_Message::validate('edit_message');
 	        
-	        if ($message->save()) {
+
+	        if ($val->run()) {
+	            $message->title = Input::post('title');
+	            $message->message = Input::post('message');
+	            
+	            if ($message->save()) {
+	                Model_MessageLog::save_log(
+	                    Session::get('username'),
+	                    'U',
+	                    $before_title,
+	                    Input::post('title'),
+	                    $before_message,
+	                    Input::post('message'),
+	                    '1'
+	                );
+	                
+	                Session::set_flash('success', 'Updated message # '. $id);
+	                
+	                Response::redirect('admin');
+	            } else {
+	                Session::set_flash('error', 'Could not update message # '. $id);
+	            }
+	        } else {
 	            Model_MessageLog::save_log(
 	                Session::get('username'),
 	                'U',
@@ -409,37 +440,21 @@ class Controller_Admin extends \Controller_Template
 	                Input::post('title'),
 	                $before_message,
 	                Input::post('message'),
-	                '1'
+	                '0'
 	            );
 	            
-	            Session::set_flash('success', 'Updated message # '. $id);
+	            if (Input::method() == 'POST') {
+	                $message->title = $val->validated('title');
+	                $message->message = $val->validated('message');
+	                
+	                Session::set_flash('error', $val->error());
+	            }
 	            
-	            Response::redirect('admin');
-	        } else {
-	            Session::set_flash('error', 'Could not update message # '. $id);
+	            $is_title_or_message_too_short = true;
 	        }
-	    } else {
-	        Model_MessageLog::save_log(
-	            Session::get('username'),
-	            'U',
-	            $before_title,
-	            Input::post('title'),
-	            $before_message,
-	            Input::post('message'),
-	            '0'
-	        );
-	        
-	        if (Input::method() == 'POST') {
-	            $message->title = $val->validated('title');
-                $message->message = $val->validated('message');
-                
-	            Session::set_flash('error', $val->error());
-	        }
-	        
-	        $is_title_or_message_too_short = true;
-	        
-	        $this->template->set_global('message', $message, false);
 	    }
+	    
+	    $this->template->set_global('message', $message, false);
 	    
 	    if ($is_title_or_message_too_short) {
 	        $this->template->title = "Admin >> Edit Message (The Title And Message Should Be At Least \"1\" Character)";
@@ -455,7 +470,7 @@ class Controller_Admin extends \Controller_Template
 	 */
 	public function action_delete_message($id = null)
 	{
-	    if (is_null(Session::get('is_login')) || (Session::get('is_admin') == '0')) {
+	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
 	        Response::redirect('404');
 	    }
 	    

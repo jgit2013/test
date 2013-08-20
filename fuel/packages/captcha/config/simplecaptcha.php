@@ -55,7 +55,7 @@ return array(
  * The route to the captcha image
  * e.g. \Uri::create('captcha/index')
  */	
-	'captcha_route' => \Uri::create('main/simplecaptcha'),
+	'captcha_route' => \Uri::create('captcha/simplecaptcha'),
 
 /** Default View
  * 
@@ -72,7 +72,8 @@ return array(
  * The number of characters for the captcha to show
  * Will be trimmed down to a number which fits into the captcha width
  */
-	'captcha_length' => 6,
+	//'captcha_length' => 6,
+	'captcha_length' => 10,
 
 /** Captcha Width
  *
@@ -80,7 +81,8 @@ return array(
  * 
  * The width in pixels for the captcha image
  */	
-	'captcha_width' => 130,
+	//'captcha_width' => 130,
+	'captcha_width' => 230,
 
 /** Captcha Height
  * 
@@ -88,7 +90,8 @@ return array(
  * 
  * The height in pixels for the captcha image
  */	
-	'captcha_height' => 50,
+	//'captcha_height' => 50,
+	'captcha_height' => 80,
 
 /** Background RGBA
  * 
@@ -96,7 +99,8 @@ return array(
  * 
  * The background rgba for the captcha image
  */	
-	'background_rgba' => array(255, 255, 255, 0),
+	//'background_rgba' => array(255, 255, 255, 0),
+	'background_rgba' => array(150, 150, 150, 0),
 	
 /** Image Type
  * 
@@ -244,7 +248,8 @@ return array(
  * 
  * The Period for the distortion
  */
-	'distort_period' => 30,
+	//'distort_period' => 30,
+	'distort_period' => 10,
 
 
 
@@ -293,7 +298,8 @@ return array(
  * If set to false it will show the base url, via Uri::base();
  * Alternatively set the string to show here.
  */
-	'message_string' => 'Fuel Captcha Package',
+	//'message_string' => 'Fuel Captcha Package',
+	'message_string' => 'Please Input What You See',
 	
 /** Message String Offset
  * 
@@ -301,7 +307,8 @@ return array(
  * 
  * The x, y offset in pixels for the message string
  */
-	'message_string_offset' => array(5, 0),
+	//'message_string_offset' => array(5, 0),
+	'message_string_offset' => array(15, 0),
 	
 /** Message Font Size
  * 
@@ -309,7 +316,8 @@ return array(
  * 
  * The size for the font in the message
  */
-	'message_font_size' => 2,
+	//'message_font_size' => 2,
+	'message_font_size' => 4,
 
 
 

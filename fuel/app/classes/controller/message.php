@@ -9,13 +9,14 @@
 class Controller_Message extends \Controller_Template
 {
     /**
-     * 將頁面導向views/message/index.php，內容為留言版的頁面，
+     * 將頁面導向views/message/index.php，
+     * 內容為留言版的頁面，
      * 除了可以建立新的訊息外，也可選擇觀看自己或其他人建立的訊息，
      * 且修改或刪除自己留的訊息 ，而訊息排列方式會由最新的訊息排到最舊的訊息
      */
     public function action_index()
     {
-        is_null(Session::get('is_login')) and Response::redirect('404');
+        is_null(Session::get('is_sign_in')) and Response::redirect('404');
         
         $data['messages'] = Model_Message::find(array(
             'select' => array('*'),
@@ -35,7 +36,7 @@ class Controller_Message extends \Controller_Template
      */
     public function action_view($id = null)
     {
-        is_null(Session::get('is_login')) and Response::redirect('404');
+        is_null(Session::get('is_sign_in')) and Response::redirect('404');
         
         is_null($id) and Response::redirect('message');
         
@@ -50,12 +51,13 @@ class Controller_Message extends \Controller_Template
     }
     
     /**
-     * 將頁面導向views/main/create.php，若未建立新訊息時顯示建立新訊息的頁面，
+     * 將頁面導向views/main/create.php，
+     * 若未建立新訊息時顯示建立新訊息的頁面，
      * 若使用者建立的標題或訊息長度不足時顯示錯誤訊息
      */
     public function action_create()
     {
-        is_null(Session::get('is_login')) and Response::redirect('404');
+        is_null(Session::get('is_sign_in')) and Response::redirect('404');
         
         $is_title_or_message_too_short = false;
         
@@ -113,11 +115,12 @@ class Controller_Message extends \Controller_Template
     }
     
     /**
-     * 將頁面導向views/main/edit.php，修改一則該使用者自己建立的訊息
+     * 將頁面導向views/main/edit.php，
+     * 修改一則該使用者自己建立的訊息
      */
     public function action_edit($id = null)
     {
-        is_null(Session::get('is_login')) and Response::redirect('404');
+        is_null(Session::get('is_sign_in')) and Response::redirect('404');
         
         is_null($id) and Response::redirect('message');
         
@@ -135,13 +138,31 @@ class Controller_Message extends \Controller_Template
         
         $is_title_or_message_too_short = false;
         
-        $val = Model_Message::validate('edit_message');
-        
-        if ($val->run()) {
-            $message->title = Input::post('title');
-            $message->message = Input::post('message');
+        if (Input::method() == 'POST') {
+            $val = Model_Message::validate('edit_message');
             
-            if ($message->save()) {
+            if ($val->run()) {
+                $message->title = Input::post('title');
+                $message->message = Input::post('message');
+                
+                if ($message->save()) {
+                    Model_MessageLog::save_log(
+                        Session::get('username'),
+                        'U',
+                        $before_title,
+                        Input::post('title'),
+                        $before_message,
+                        Input::post('message'),
+                        '1'
+                    );
+                    
+                    Session::set_flash('success', 'Updated message # ' . $id);
+                    
+                    Response::redirect('message');
+                } else {
+                    Session::set_flash('error', 'Could not update message # ' . $id);
+                }
+            } else {
                 Model_MessageLog::save_log(
                     Session::get('username'),
                     'U',
@@ -149,37 +170,21 @@ class Controller_Message extends \Controller_Template
                     Input::post('title'),
                     $before_message,
                     Input::post('message'),
-                    '1'
+                    '0'
                 );
+
+                if (Input::method() == 'POST') {
+                    $message->title = $val->validated('title');
+                    $message->message = $val->validated('message');
+
+                    Session::set_flash('error', $val->error());
+                }
                 
-                Session::set_flash('success', 'Updated message # ' . $id);
-                
-                Response::redirect('message');
-            } else {
-                Session::set_flash('error', 'Could not update message # ' . $id);
+                $is_title_or_message_too_short = true;
             }
-        } else {
-            Model_MessageLog::save_log(
-                Session::get('username'),
-                'U',
-                $before_title,
-                Input::post('title'),
-                $before_message,
-                Input::post('message'),
-                '0'
-            );
-            
-            if (Input::method() == 'POST') {
-                $message->title = $val->validated('title');
-                $message->message = $val->validated('message');
-                
-                Session::set_flash('error', $val->error());
-            }
-            
-            $is_title_or_message_too_short = true;
-            
-            $this->template->set_global('message', $message, false);
         }
+        
+        $this->template->set_global('message', $message, false);
         
         if ($is_title_or_message_too_short) {
             $this->template->title = "Messages >> Edit (Your Title And Message Should Be At Least \"1\" Character)";
@@ -195,7 +200,7 @@ class Controller_Message extends \Controller_Template
      */
     public function action_delete($id = null)
     {
-        is_null(Session::get('is_login')) and Response::redirect('404');
+        is_null(Session::get('is_sign_in')) and Response::redirect('404');
         
         is_null($id) and Response::redirect('message');
         

@@ -25,6 +25,38 @@
 		</div>
 		
 		<div class="control-group">
+			<?php echo Form::label('Before Title', 'before_title', array('class'=>'control-label')); ?>
+
+			<div class="controls">
+				<?php echo Form::input('before_title', Input::post('before_title', isset($log) ? $log->before_title : ''), array('class' => 'span4', 'placeholder'=>'Before Title')); ?>
+			</div>
+		</div>
+		
+		<div class="control-group">
+			<?php echo Form::label('After Title', 'after_title', array('class'=>'control-label')); ?>
+
+			<div class="controls">
+				<?php echo Form::input('after_title', Input::post('after_title', isset($log) ? $log->after_title : ''), array('class' => 'span4', 'placeholder'=>'After Title')); ?>
+			</div>
+		</div>
+		
+		<div class="control-group">
+			<?php echo Form::label('Before Message', 'before_message', array('class'=>'control-label')); ?>
+
+			<div class="controls">
+				<?php echo Form::input('before_message', Input::post('before_message', isset($log) ? $log->before_message : ''), array('class' => 'span4', 'placeholder'=>'Before Message')); ?>
+			</div>
+		</div>
+		
+		<div class="control-group">
+			<?php echo Form::label('After Message', 'after_message', array('class'=>'control-label')); ?>
+
+			<div class="controls">
+				<?php echo Form::input('after_message', Input::post('after_message', isset($log) ? $log->after_message : ''), array('class' => 'span4', 'placeholder'=>'After Message')); ?>
+			</div>
+		</div>
+		
+		<div class="control-group">
 			<?php echo Form::label('Is Succeed', 'is_succeed', array('class'=>'control-label')); ?>
 
 			<div class="controls">
@@ -34,6 +66,7 @@
 		
 		<div class="control-group">
 			<label class='control-label'>&nbsp;</label>
+			
 			<div class='controls'>
 				<?php echo Form::submit('submit', 'Find', array('class' => 'btn btn-primary')); ?>
 			</div>

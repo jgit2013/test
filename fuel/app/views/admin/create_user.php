@@ -3,5 +3,5 @@
 
 <?php echo render('admin/_form_create_user'); ?>
 
-
 <p><?php echo Html::anchor('admin', 'Back'); ?></p>
+<hr>

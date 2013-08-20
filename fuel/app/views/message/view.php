@@ -14,7 +14,8 @@
 	<strong>Message:</strong>
 	<?php echo $message->message; ?>
 </p>
-<?php if($message->username == Session::get('username')): ?>
+<?php if ($message->username == Session::get('username')): ?>
     <?php echo Html::anchor('message/edit/'.$message->id, 'Edit'); ?> |
 <?php endif; ?>
 <?php echo Html::anchor('message', 'Back'); ?>
+<hr>

@@ -54,7 +54,7 @@ class Model_User extends \Model_Crud
 		$val = Validation::forge($factory);
 		
 		$val->add_field('username', 'Username', 'required|min_length[1]|max_length[20]');
-		$val->add_field('password', 'Password', 'required|min_length[4]|max_length[20]');
+		$val->add_field('password', 'Password', 'required|min_length[4]|max_length[12]');
 		
 		return $val;
 	}

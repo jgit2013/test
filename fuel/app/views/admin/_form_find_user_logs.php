@@ -1,6 +1,14 @@
 <?php echo Form::open(array("class"=>"form-horizontal")); ?>
 	<fieldset>
 		<div class="control-group">
+			<?php echo Form::label('IP Address', 'ip_address', array('class'=>'control-label')); ?>
+
+			<div class="controls">
+				<?php echo Form::input('ip_address', Input::post('ip_address', isset($log) ? $log->ip_address : ''), array('class' => 'span4', 'placeholder'=>'Ip Address')); ?>
+			</div>
+		</div>
+		
+		<div class="control-group">
 			<?php echo Form::label('Username', 'username', array('class'=>'control-label')); ?>
 
 			<div class="controls">
@@ -26,6 +34,7 @@
 		
 		<div class="control-group">
 			<label class='control-label'>&nbsp;</label>
+			
 			<div class='controls'>
 				<?php echo Form::submit('submit', 'Find', array('class' => 'btn btn-primary')); ?>
 			</div>

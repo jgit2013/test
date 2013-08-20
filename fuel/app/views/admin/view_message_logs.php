@@ -21,19 +21,21 @@
 		</tr>
 	</thead>
 	<tbody>
-<?php foreach ($logs as $log): ?>		<tr>
-			<td><?php echo $log->time; ?></td>
-			<td><?php echo $log->username; ?></td>
-			<td><?php echo $log->action; ?></td>
-			<td><?php echo $log->before_title; ?></td>
-			<td><?php echo $log->after_title; ?></td>
-			<td><?php echo $log->before_message; ?></td>
-			<td><?php echo $log->after_message; ?></td>
-			<td><?php echo $log->is_succeed; ?></td>
-		</tr>
-<?php endforeach; ?>	</tbody>
+        <?php foreach ($logs as $log): ?>
+            <tr>
+                <td><?php echo $log->time; ?></td>
+                <td><?php echo $log->username; ?></td>
+                <td><?php echo $log->action; ?></td>
+                <td><?php echo $log->before_title; ?></td>
+                <td><?php echo $log->after_title; ?></td>
+                <td><?php echo $log->before_message; ?></td>
+                <td><?php echo $log->after_message; ?></td>
+                <td><?php echo $log->is_succeed; ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
 </table>
 <?php else: ?>
-<p>No Logs.</p>
+    <p>No Logs.</p>
 <?php endif; ?><p>
 <hr>

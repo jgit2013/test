@@ -16,7 +16,7 @@ return array(
  * 
  * The private key for recaptcha
  */	
-	'private_key' => '6Lf5LOYSAAAAAMrVsATt-4aslkBgiSnbTbXAQmPM',
+	'private_key' => '6LccQ-YSAAAAAA2GD0g1RHe7Fo0k0kJVThEquVkv',
 	
 /** Public Key
  * 
@@ -24,7 +24,7 @@ return array(
  * 
  * The public key for recaptcha
  */	
-	'public_key' => '6Lf5LOYSAAAAAIPqZi6xAEu9hpXFht3qhE_ao_U3',
+	'public_key' => '6LccQ-YSAAAAAOfDKrMFFaZxeWT2QboSffUF6k8H',
 
 /** Server
  * 

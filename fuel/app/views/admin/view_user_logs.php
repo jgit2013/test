@@ -9,6 +9,7 @@
 <table class="table table-striped">
 	<thead>
 		<tr>
+			<th>IP Address</th>
 			<th>Username</th>
 			<th>Sign In Time</th>
 			<th>Sign Out Time</th>
@@ -17,16 +18,18 @@
 		</tr>
 	</thead>
 	<tbody>
-<?php foreach ($logs as $log): ?>
-    <tr>
-        <td><?php echo $log->username; ?></td>
-        <td><?php echo $log->sign_in_time; ?></td>
-        <td><?php echo $log->sign_out_time; ?></td>
-        <td><?php echo $log->during; ?></td>
-    </tr>
-<?php endforeach; ?>	</tbody>
+        <?php foreach ($logs as $log): ?>
+            <tr>
+                <td><?php echo $log->ip_address; ?></td>
+                <td><?php echo $log->username; ?></td>
+                <td><?php echo $log->sign_in_time; ?></td>
+                <td><?php echo $log->sign_out_time; ?></td>
+                <td><?php echo $log->during; ?></td>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
 </table>
 <?php else: ?>
 <p>No Logs.</p>
-<?php endif; ?><p>
+    <?php endif; ?><p>
 <hr>

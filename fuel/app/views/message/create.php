@@ -3,5 +3,5 @@
 
 <?php echo render('message/_form'); ?>
 
-
 <p><?php echo Html::anchor('message', 'Back'); ?></p>
+<hr>
