@@ -35,85 +35,56 @@ class Controller_Main extends \Controller_Template
      */
     public function action_sign_in()
     {
-        $is_username_or_password_incorrect = false;
         $is_captcha_incorrect = false;
+        $is_username_or_password_incorrect = false;
         
         if (Input::method() == 'POST') {
-            $val = Model_User::validate('sign_in');
+            $is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
             
-            if ($val->run()) {
-                $sign_in = Model_User::forge(array(
-                    'username' => Input::post('username'),
-                    'password' => md5(Input::post('password'))
-                ));
+            if ( ! $is_captcha_incorrect) {
+                $found_user = Model_User::check_user(
+                    Input::post('username'),
+                    Input::post('password'),
+                    'IN TABLE'
+                );
                 
-                if ($sign_in) {
-                    $data['users'] = Model_User::find(array(
-                        'select' => array('id', 'username', 'password', 'is_admin'),
-                        'where' => array(
-                            array('username', '=', $sign_in->username),
-                            array('password', '=', $sign_in->password)
-                        )
-                    ));
-                    
-                    if ( ! is_null($data['users'])) {
-                        $is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
-                        
-                        if ( ! $is_captcha_incorrect) {
-                            Session::set('ip_address', Input::real_ip());
-                            
-                            $date = Date::forge();
-                            
-                            $date->set_timezone('Asia/Taipei');
-                            
-                            Session::set('sign_in_timestamp', $date->get_timestamp());
-                            Session::set('sign_in_time', $date->format('%Y-%m-%d %H:%M:%S'));
-                            
-                            Session::set('user_id', $data['users'][0]->id);
-                            Session::set('username', $sign_in->username);
-                            Session::set('is_sign_in', 'True');
-                            
-                            // echo '<pre>'; var_dump($data); //debug test
-                            // echo $data['users'][0]->username.' '.$data['users'][0]->password.'<br/>'; //debug test
-                            // echo Session::get('username').' '.Session::get('is_admin').'<br/>'; //debug test
-                            
-                            if ($data['users'][0]->is_admin == 1) {
-                                Session::set('is_admin', '1');
-                                
-                                Response::redirect('admin');
-                            } else {
-                                Session::set('is_admin', '0');
-                                
-                                Response::redirect('message');
-                            }
-                        }
-                    } else {
-                        $is_username_or_password_incorrect = true;
-                    }
+                if (($found_user == 'ERROR') || ($found_user == 'NOT IN TABLE')) {
+                    $is_username_or_password_incorrect = true;
                 } else {
-                    Session::set_flash('error', 'Could not sign in.');
-                }
-            } else {
-                $is_username_or_password_incorrect = true;
+                    Session::set('ip_address', Input::real_ip());
+                    
+                    $date = Date::forge();
+                    
+                    $date->set_timezone('Asia/Taipei');
+                    
+                    Session::set('sign_in_timestamp', $date->get_timestamp());
+                    Session::set('sign_in_time', $date->format('%Y-%m-%d %H:%M:%S'));
+                    
+                    Session::set('user_id', $found_user->id);
+                    Session::set('username', $found_user->username);
+                    Session::set('is_sign_in', 'True');
                 
-                Session::set_flash('error', $val->error());
+                    if ($found_user->is_admin == 1) {
+                        Session::set('is_admin', '1');
+                    
+                        Response::redirect('admin');
+                    } else {
+                        Session::set('is_admin', '0');
+                    
+                        Response::redirect('message');
+                    }
+                }
             }
         }
         
         $this->template->set_global('captcha_driver', $this->captcha_driver, false);
         
-        if ($is_username_or_password_incorrect) {
+        if ($is_captcha_incorrect || $is_username_or_password_incorrect) {
             $this->template->title = "Sign In >> Incorrect Username Or Password";
             $this->template->content = View::forge('main/sign_in');
         } else {
-            if ($is_captcha_incorrect) {
-                $this->template->title = "Sign In >> The Captcha is Incorrect";
-                $this->template->content = View::forge('main/sign_in');
-            }
-            else {
-                $this->template->title = "Sign In >> Admin User: Username=admin, Password=admin";
-                $this->template->content = View::forge('main/sign_in');
-            }
+            $this->template->title = "Sign In >> Admin User: Username=admin, Password=admin";
+            $this->template->content = View::forge('main/sign_in');
         }
     }
     
@@ -159,45 +130,6 @@ class Controller_Main extends \Controller_Template
      */
     public function action_create_user()
     {
-        /*if (Input::method() == 'POST') {
-             $val = Model_User::validate('create_user');
-            
-            if ($val->run()) {
-                $input = Model_User::forge(array(
-                    'username' => Input::post('username'),
-                    'password' => md5(Input::post('password')),
-                ));
-                
-                $users = Model_User::find(array(
-                    'select' => array('username'),
-                ));
-                
-                foreach ($users as $user) {
-                    if ($input->username == $user->username) {
-                        $is_username_in_use = true;
-                        
-                        break;
-                    }
-                }
-                
-                $is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
-                
-                if ( ! $is_username_in_use && ! $is_captcha_incorrect) {
-                    if ($input and $input->save()) {
-                        Session::set_flash('success', 'Added user # '.$input->id.'.');
-                        
-                        Response::redirect('main/go');
-                    } else {
-                        Session::set_flash('error', 'Could not save user.');
-                    }
-                }
-            } else {
-                $is_username_or_password_too_short = true;
-                
-                Session::set_flash('error', $val->error());
-            }
-        } */
-        
         $is_captcha_incorrect = false;
         $is_username_in_use = false;
         $is_username_or_password_too_short = false;
@@ -206,16 +138,19 @@ class Controller_Main extends \Controller_Template
             $is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
             
             if ( ! $is_captcha_incorrect) {
-                $check_user_in_use = Model_User::check_user_in_use(
+                $new_user = Model_User::check_user(
                     Input::post('username'),
-                    Input::post('password')
+                    Input::post('password'),
+                    'IN USE'
                 );
                 
-                if ($check_user_in_use == 'ERROR') {
+                if ($new_user == 'ERROR') {
                     $is_username_or_password_too_short = true;
-                } else if ($check_user_in_use == 'IN USE') {
+                } else if ($new_user == 'IN USE') {
                     $is_username_in_use = true;
                 } else {
+                    $new_user->save();
+                    
                     Response::redirect('main/go');
                 }
             }
@@ -236,27 +171,6 @@ class Controller_Main extends \Controller_Template
                 $this->template->content = View::forge('main/create_user');
             }
         }
-        
-        /* if ($is_username_in_use) {
-            $this->template->title = "Create A New User >> Your Username Is Already In Use";
-            $this->template->content = View::forge('main/create_user');
-        } else {
-            if ($is_username_or_password_too_short) {
-                $this->template->title = "Create A New User >> Your Username Should Be At Least \"1\" Character,
-                                                          And Your Password Should Be At Least \"4\" Characters";
-                
-                $this->template->content = View::forge('main/create_user');
-            } else {
-                if ($is_captcha_incorrect) {
-                    $this->template->title = "Create A New User >> The Captcha is Incorrect";
-                    $this->template->content = View::forge('main/create_user');
-                }
-                else {
-                    $this->template->title = "Create A New User";
-                    $this->template->content = View::forge('main/create_user');
-                }
-            }
-        } */
     }
     
     /**

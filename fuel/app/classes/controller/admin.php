@@ -107,37 +107,6 @@ class Controller_Admin extends \Controller_Template
 	            'is_succeed' => Input::post('is_succeed'),
 	        ));
 	        
-	        /* echo '<pre>'; print_r($input);
-	        
-	        exit; //debug test */
-	        
-	        /* $result = \DB::query("SELECT * FROM msgboard.message_logs ".
-	                                          "WHERE time LIKE '".$input->time."%' OR ".
-	                                                        "username='".$input->username."' OR ".
-	                                                        "action='".$input->action."' OR ".
-	                                                        "is_succeed='".$input->is_succeed.
-	                                          "' ORDER BY id DESC")->execute(); */
-	        
-	        //echo '<pre>'; print_r($result);
-	        
-// 	        foreach ($result as $key => $value) {
-// 	            //echo '['.$key.']<br/>';
-	            
-// 	            $data['logs'][] = Model_MessageLog::forge($value);
-	            
-// 	            /* foreach ($value as $logs => $log) {
-// 	                echo '['.$logs.']'.$log.'<br/>';
-// 	            } */
-	            
-// 	            //echo '<hr/>';
-// 	        }
-	        
-	        //$data['logs'] = Model_MessageLog::forge($result->as_array());
-	        
-	        /* echo '<pre>'; print_r($data['logs']);
-	        
-	        exit; //debug test */
-	        
 	        $conditions = null;
 	        
 	        if ($input->time != '') {
@@ -172,27 +141,13 @@ class Controller_Admin extends \Controller_Template
 	            $conditions[] = array('is_succeed', '=', $input->is_succeed);
 	        }
 	        
-	        /* echo '<pre>'; print_r($conditions);
-	        
-	        exit; */
-	        
 	        $data['logs'] = Model_MessageLog::find(array(
 	            'select' => array('*'),
 	            'where' => $conditions,
-	            /* 'where' => array(
-	                //array('time', 'like', '%'.$input->time.'%'),
-	                array('username', '=', $input->username),
-	                array('action', '=', $input->action),
-	                //array('is_succeed', '=', $input->is_succeed),
-	            ), */
 	            'order_by' => array(
 	                'id' => 'desc',
 	            ),
 	        ));
-	        
-	        /* echo '<pre>'; print_r($data['logs']);
-	        
-	        exit; */
 	    } else {
 	        $data['logs'] = Model_MessageLog::find(array(
 	            'select' => array('*'),
@@ -202,73 +157,6 @@ class Controller_Admin extends \Controller_Template
 	    
 	    $this->template->title = "Admin >> View Message Logs";
 	    $this->template->content = View::forge('admin/view_message_logs', $data);
-	}
-	
-	/**
-	 * 將頁面導向views/admin/create_user.php，
-	 * 若未建立新使用者時顯示建立新使用者的頁面，
-	 * 若使用者名稱或密碼長度不足時顯示錯誤訊息
-	 */
-	public function action_create_user()
-	{
-	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
-	        Response::redirect('404');
-	    }
-	    
-	    $is_username_in_use = false;
-	    $is_username_or_password_too_short = false;
-	    
-		if (Input::method() == 'POST') {
-			$val = Model_User::validate('create');
-			
-			if ($val->run()) {
-				$input = Model_User::forge(array(
-					'username' => Input::post('username'),
-					'password' => Input::post('password'),
-				));
-				
-				$users = Model_User::find(array(
-				    'select' => array('username'),
-				));
-				
-				foreach ($users as $user) {
-				    if ($input->username == $user->username) {
-				        $is_username_in_use = true;
-				
-				        break;
-				    }
-				}
-				
-				if ( ! $is_username_in_use) {
-				    if ($input and $input->save()) {
-				        Session::set_flash('success', 'Added user # '.$input->id.'.');
-				
-				        Response::redirect('admin');
-				    } else {
-				        Session::set_flash('error', 'Could not save user.');
-				    }
-				}
-			} else {
-			    $is_username_or_password_too_short = true;
-			    
-				Session::set_flash('error', $val->error());
-			}
-		}
-		
-		if ($is_username_in_use) {
-		    $this->template->title = "Admin >> Create User (The Username Is Already In Use)";
-		    $this->template->content = View::forge('admin/create_user');
-		} else {
-		    if ($is_username_or_password_too_short) {
-		        $this->template->title = "Admin >> Create User (The Username Should Be At Least \"1\" Character,
-		                                                  And Your Password Should Be At Least \"4\" Characters)";
-		    
-		        $this->template->content = View::forge('admin/create_user');
-		    } else {
-		        $this->template->title = "Admin >> Create User";
-		        $this->template->content = View::forge('admin/create_user');
-		    }
-		}
 	}
 	
 	/**
@@ -404,8 +292,6 @@ class Controller_Admin extends \Controller_Template
 	    }
 	    
 	    $is_title_or_message_too_short = false;
-
-	    $val = Model_Message::validate('edit_message');
 	    
 	    if (Input::method() == 'POST') {
 	        $val = Model_Message::validate('edit_message');

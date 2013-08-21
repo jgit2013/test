@@ -1,11 +1,8 @@
-<?php echo Html::anchor('admin/view_user_logs', 'View User Logs', array('class' => 'btn btn-success')); ?>
+<?php echo Html::anchor('admin/create_message', 'Add New Message', array('class' => 'btn btn-success')); ?>
+ | <?php echo Html::anchor('admin/view_user_logs', 'View User Logs', array('class' => 'btn btn-success')); ?>
  | <?php echo Html::anchor('admin/view_message_logs', 'View Message Logs', array('class' => 'btn btn-success')); ?>
  | <?php echo Html::anchor('main/sign_out', 'Sign Out', array('class' => 'btn btn-success')); ?>
 <hr>
-
-<p>
-    <?php echo Html::anchor('admin/create_user', 'Add New User', array('class' => 'btn btn-success')); ?>
-</p>
 
 <h2>Listing <span class='muted'>Users</span></h2>
 <?php if ($users): ?>
@@ -35,10 +32,6 @@
     <p>No Users.</p>
 <?php endif; ?><p>
 <hr>
-
-<p>
-    <?php echo Html::anchor('admin/create_message', 'Add New Message', array('class' => 'btn btn-success')); ?>
-</p>
 
 <h2>Listing <span class='muted'>Messages</span></h2>
 <br>
