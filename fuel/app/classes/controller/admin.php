@@ -192,22 +192,22 @@ class Controller_Admin extends \Controller_Template
 	    
 	    is_null($id) and Response::redirect('admin');
 	    
-	    if ( ! $data['message'] = Model_Message::find_by_pk($id)) {
-	        Session::set_flash('error', 'Could not find user # '.$id);
-	        
+	    if ( ! $found_message = Model_Message::find_by_pk($id)) {
 	        Response::redirect('admin');
+	    } else {
+	        $this->template->set_global('found_message', $found_message, false);
+	        
+	        $this->template->title = "Admin >> View Message";
+	        $this->template->content = View::forge('admin/view_message');
 	    }
-	    
-	    $this->template->title = "Admin >> View Message";
-	    $this->template->content = View::forge('admin/view_message', $data);
 	}
 	
 	/**
-	 * 將頁面導向views/admin/create_message.php，
+	 * 將頁面導向views/admin/add_message.php，
 	 * 若未建立新訊息時顯示建立新訊息的頁面，
 	 * 若使用者建立的標題或訊息長度不足時顯示錯誤訊息
 	 */
-	public function action_create_message()
+	public function action_add_message()
 	{
 	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
 	        Response::redirect('404');
@@ -216,7 +216,7 @@ class Controller_Admin extends \Controller_Template
 	    $is_title_or_message_too_short = false;
 	    
 	    if (Input::method() == 'POST') {
-	        $val = Model_Message::validate('create_message');
+	        $val = Model_Message::validate('add_message');
 	        
 	        if ($val->run()) {
 	            $message = Model_Message::forge(array(
@@ -260,11 +260,11 @@ class Controller_Admin extends \Controller_Template
 	    }
 	    
 	    if ($is_title_or_message_too_short) {
-	        $this->template->title = "Admin >> Create Message (Your Title And Message Should Be At Least \"1\" Character)";
-	        $this->template->content = View::forge('admin/create_message');
+	        $this->template->title = "Admin >> Add Message (The Title And Message Should Be At Least \"1\" Character)";
+	        $this->template->content = View::forge('admin/add_message');
 	    } else {
-	        $this->template->title = "Admin >> Create Message";
-	        $this->template->content = View::forge('admin/create_message');
+	        $this->template->title = "Admin >> Add Message";
+	        $this->template->content = View::forge('admin/add_message');
 	    }
 	}
 	
@@ -282,13 +282,13 @@ class Controller_Admin extends \Controller_Template
 	    $before_title = null;
 	    $before_message = null;
 	    
-	    if ( ! $message = Model_Message::find_by_pk($id)) {
+	    if ( ! $found_message = Model_Message::find_by_pk($id)) {
 	        Session::set_flash('error', 'Could not find message # '.$id);
 	        
 	        Response::redirect('admin');
 	    } else {
-	        $before_title = $message->title;
-	        $before_message = $message->message;
+	        $before_title = $found_message->title;
+	        $before_message = $found_message->message;
 	    }
 	    
 	    $is_title_or_message_too_short = false;
@@ -298,10 +298,10 @@ class Controller_Admin extends \Controller_Template
 	        
 
 	        if ($val->run()) {
-	            $message->title = Input::post('title');
-	            $message->message = Input::post('message');
+	            $found_message->title = Input::post('title');
+	            $found_message->message = Input::post('message');
 	            
-	            if ($message->save()) {
+	            if ($found_message->save()) {
 	                Model_MessageLog::save_log(
 	                    Session::get('username'),
 	                    'U',
@@ -330,8 +330,8 @@ class Controller_Admin extends \Controller_Template
 	            );
 	            
 	            if (Input::method() == 'POST') {
-	                $message->title = $val->validated('title');
-	                $message->message = $val->validated('message');
+	                $found_message->title = $val->validated('title');
+	                $found_message->message = $val->validated('message');
 	                
 	                Session::set_flash('error', $val->error());
 	            }
@@ -340,7 +340,7 @@ class Controller_Admin extends \Controller_Template
 	        }
 	    }
 	    
-	    $this->template->set_global('message', $message, false);
+	    $this->template->set_global('found_message', $found_message, false);
 	    
 	    if ($is_title_or_message_too_short) {
 	        $this->template->title = "Admin >> Edit Message (The Title And Message Should Be At Least \"1\" Character)";

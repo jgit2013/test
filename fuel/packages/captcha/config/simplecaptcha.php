@@ -249,7 +249,7 @@ return array(
  * The Period for the distortion
  */
 	//'distort_period' => 30,
-	'distort_period' => 10,
+	'distort_period' => 15,
 
 
 

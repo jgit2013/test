@@ -4,7 +4,7 @@
             <?php echo Form::label('Time', 'time', array('class'=>'control-label')); ?>
             
             <div class="controls">
-                <?php echo Form::label($found_message->time, 'show_time', array('class' => 'span4', 'placeholder'=>'Time')); ?>
+                <?php echo Form::label($found_message->time, 'show_time', array('class' => 'span4')); ?>
             </div>
         </div>
         
@@ -12,7 +12,7 @@
             <?php echo Form::label('Username', 'username', array('class'=>'control-label')); ?>
             
             <div class="controls">
-                <?php echo Form::label($found_message->username, 'show_username', array('class' => 'span4', 'placeholder'=>'Username')); ?>
+                <?php echo Form::label($found_message->username, 'show_username', array('class' => 'span4')); ?>
             </div>
         </div>
         
@@ -20,7 +20,7 @@
             <?php echo Form::label('Title', 'title', array('class'=>'control-label')); ?>
             
             <div class="controls">
-                <?php echo Form::input('title', $found_message->title, array('class' => 'span4', 'placeholder'=>'Title')); ?>
+                <?php echo Form::label($found_message->title, 'show_title', array('class' => 'span4')); ?>
             </div>
         </div>
         
@@ -28,7 +28,7 @@
             <?php echo Form::label('Message', 'message', array('class'=>'control-label')); ?>
             
             <div class="controls">
-                <?php echo Form::textarea('message', $found_message->message, array('class' => 'span8', 'rows' => 8, 'placeholder'=>'Message')); ?>
+                <?php echo Form::textarea('show_message', $found_message->message, array('class' => 'span8', 'rows' => 8, 'readonly')); ?>
             </div>
         </div>
         
@@ -36,9 +36,8 @@
             <label class='control-label'>&nbsp;</label>
             
             <div class='controls'>
-                <?php echo Html::anchor('admin/view_message/'.$found_message->id, 'View', array('class' => 'btn btn-primary')); ?>
-                 | <?php echo Form::submit('submit', 'Save', array('class' => 'btn btn-primary')); ?>
-                 | <?php echo Html::anchor('admin', 'Back', array('class' => 'btn btn-primary')); ?>
+                <?php echo Html::anchor('admin/edit_message/'.$found_message->id, 'Edit', array('class' => 'btn btn-primary')); ?> |
+                <?php echo Html::anchor('admin', 'Back', array('class' => 'btn btn-primary')); ?>
             </div>
         </div>
     </fieldset>

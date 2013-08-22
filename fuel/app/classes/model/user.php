@@ -64,7 +64,8 @@ class Model_User extends \Model_Crud
 	 *
 	 * @param  string  $username 使用者名稱
 	 * @param  string  $password 使用者密碼
-	 * @param  string  $check_type 所要判斷的類型，'IN USE'判斷使用者名稱是否己經使用，'IN TABLE'判斷使用者名稱與密碼是否在資料表中
+	 * @param  string  $check_type 所要判斷的類型('IN USE'表示要判斷使用者名稱是否己經使用，
+	 *                                                                         'IN TABLE'表示要判斷使用者名稱與密碼是否在資料表中)
 	 * @return  當使用者名稱或密碼長度太短時，回傳字串'ERROR'；
 	 *                 當使用者名稱已存在資料表中時，回傳字串'IN USE'，反之則回傳包含該使用者名稱與密碼的Model_User物件；
 	 *                 當使用者名稱與密碼不存在資料表中時，回傳字串'NOT IN TABLE'，反之則回傳包含該使用者資料的Model_User物件；

@@ -1,7 +1,8 @@
 <p>
-    <?php echo Html::anchor('message/create', 'Add New Message', array('class' => 'btn btn-success')); ?>
-    <?php echo Html::anchor('main/sign_out', 'Sign Out', array('class' => 'btn btn-success')); ?>
+    <?php echo Html::anchor('message/add', 'Add New Message', array('class' => 'btn btn-success')); ?>
+    | <?php echo Html::anchor('main/sign_out', 'Sign Out', array('class' => 'btn btn-success')); ?>
 </p>
+<hr>
 
 <h2>Listing <span class='muted'>Messages</span></h2>
 <br>

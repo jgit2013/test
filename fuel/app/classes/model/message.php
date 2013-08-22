@@ -59,4 +59,44 @@ class Model_Message extends \Model_Crud
 		
 		return $val;
 	}
+	
+	/* public static function check_message(
+	    $username,
+	    $title,
+	    $message,
+	    $check_type
+	) {
+	    $val = Model_Message::validate('title_and_message');
+	    
+	    if ( ! $val->run()) {
+	        return 'ERROR';
+	    } else {
+	        switch ($check_type) {
+	            case 'ADD' : {
+	                $message = Model_Message::forge(array(
+	                    'username' => $username,
+	                    'title' => $title,
+	                    'message' => $message,
+	                ));
+	                
+	                if ($message && $message->save()) {
+	                    Model_MessageLog::save_log(Session::get('username'), 'C', '', Input::post('title'), '', Input::post('message'), '1');
+	                    
+	                    return 'ADD OK';
+	                } else {
+	                    Model_MessageLog::save_log(Session::get('username'), 'C', '', Input::post('title'), '', Input::post('message'), '0');
+	                    
+	                }
+	            }
+	            
+	            case 'EDIT' : {
+	                
+	            }
+	            
+	            default : {
+	                return false;
+	            }
+	        }
+	    }
+	} */
 }

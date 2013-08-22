@@ -33,6 +33,7 @@
             
             <div class='controls'>
                 <?php echo Form::submit('submit', 'Sign in', array('class' => 'btn btn-primary')); ?>
+                 | <?php echo Html::anchor('main', 'Back', array('class' => 'btn btn-primary')); ?>
             </div>
         </div>
     </fieldset>

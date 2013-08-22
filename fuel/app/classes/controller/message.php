@@ -25,8 +25,6 @@ class Controller_Message extends \Controller_Template
         
         //$data['messages'] = Model_Message::find_all(); //find all the records in the table
         
-        //echo '<pre>'; print_r($data); //print format array
-        
         $this->template->title = "Hello, \"".Session::get('username')."\"";
         $this->template->content = View::forge('message/index', $data);
     }
@@ -40,29 +38,29 @@ class Controller_Message extends \Controller_Template
         
         is_null($id) and Response::redirect('message');
         
-        if ( ! $data['message'] = Model_Message::find_by_pk($id)) {
-            Session::set_flash('error', 'Could not find message # '.$id);
-            
+        if ( ! $found_message = Model_Message::find_by_pk($id)) {
             Response::redirect('message');
+        } else {
+            $this->template->set_global('found_message', $found_message, false);
+            
+            $this->template->title = "Message >> View";
+            $this->template->content = View::forge('message/view');
         }
-        
-        $this->template->title = "Message >> View";
-        $this->template->content = View::forge('message/view', $data);
     }
     
     /**
-     * 將頁面導向views/main/create.php，
+     * 將頁面導向views/message/add.php，
      * 若未建立新訊息時顯示建立新訊息的頁面，
      * 若使用者建立的標題或訊息長度不足時顯示錯誤訊息
      */
-    public function action_create()
+    public function action_add()
     {
         is_null(Session::get('is_sign_in')) and Response::redirect('404');
         
         $is_title_or_message_too_short = false;
         
         if (Input::method() == 'POST') {
-            $val = Model_Message::validate('create_message');
+            $val = Model_Message::validate('add_message');
             
             if ($val->run()) {
                 $message = Model_Message::forge(array(
@@ -106,16 +104,16 @@ class Controller_Message extends \Controller_Template
         }
         
         if ($is_title_or_message_too_short) {
-            $this->template->title = "Messages >> Create (Your Title And Message Should Be At Least \"1\" Character)";
-            $this->template->content = View::forge('message/create');
+            $this->template->title = "Message >> Add (Your Title And Message Should Be At Least \"1\" Character)";
+            $this->template->content = View::forge('message/add');
         } else {
-            $this->template->title = "Messages >> Create";
-            $this->template->content = View::forge('message/create');
+            $this->template->title = "Message >> Add";
+            $this->template->content = View::forge('message/add');
         }
     }
     
     /**
-     * 將頁面導向views/main/edit.php，
+     * 將頁面導向views/message/edit.php，
      * 修改一則該使用者自己建立的訊息
      */
     public function action_edit($id = null)
@@ -127,13 +125,13 @@ class Controller_Message extends \Controller_Template
         $before_title = null;
         $before_message = null;
         
-        if ( ! $message = Model_Message::find_by_pk($id)) {
+        if ( ! $found_message = Model_Message::find_by_pk($id)) {
             Session::set_flash('error', 'Could not find message # '.$id);
             
             Response::redirect('message');
         } else {
-            $before_title = $message->title;
-            $before_message = $message->message;
+            $before_title = $found_message->title;
+            $before_message = $found_message->message;
         }
         
         $is_title_or_message_too_short = false;
@@ -142,10 +140,10 @@ class Controller_Message extends \Controller_Template
             $val = Model_Message::validate('edit_message');
             
             if ($val->run()) {
-                $message->title = Input::post('title');
-                $message->message = Input::post('message');
+                $found_message->title = Input::post('title');
+                $found_message->message = Input::post('message');
                 
-                if ($message->save()) {
+                if ($found_message->save()) {
                     Model_MessageLog::save_log(
                         Session::get('username'),
                         'U',
@@ -174,8 +172,8 @@ class Controller_Message extends \Controller_Template
                 );
 
                 if (Input::method() == 'POST') {
-                    $message->title = $val->validated('title');
-                    $message->message = $val->validated('message');
+                    $found_message->title = $val->validated('title');
+                    $found_message->message = $val->validated('message');
 
                     Session::set_flash('error', $val->error());
                 }
@@ -184,13 +182,13 @@ class Controller_Message extends \Controller_Template
             }
         }
         
-        $this->template->set_global('message', $message, false);
+        $this->template->set_global('found_message', $found_message, false);
         
         if ($is_title_or_message_too_short) {
-            $this->template->title = "Messages >> Edit (Your Title And Message Should Be At Least \"1\" Character)";
+            $this->template->title = "Message >> Edit (Your Title And Message Should Be At Least \"1\" Character)";
             $this->template->content = View::forge('message/edit');
         } else {
-            $this->template->title = "Messages >> Edit";
+            $this->template->title = "Message >> Edit";
             $this->template->content = View::forge('message/edit');
         }
     }
