@@ -1,7 +1,7 @@
-<?php echo Html::anchor('admin/add_message', 'Add New Message', array('class' => 'btn btn-success')); ?>
- | <?php echo Html::anchor('admin/view_user_logs', 'View User Logs', array('class' => 'btn btn-success')); ?>
- | <?php echo Html::anchor('admin/view_message_logs', 'View Message Logs', array('class' => 'btn btn-success')); ?>
- | <?php echo Html::anchor('main/sign_out', 'Sign Out', array('class' => 'btn btn-success')); ?>
+<?php echo Html::anchor('add_message', 'Add New Message', array('class' => 'btn btn-success')); ?>
+ | <?php echo Html::anchor('view_user_logs', 'View User Logs', array('class' => 'btn btn-success')); ?>
+ | <?php echo Html::anchor('view_message_logs', 'View Message Logs', array('class' => 'btn btn-success')); ?>
+ | <?php echo Html::anchor('sign_out', 'Sign Out', array('class' => 'btn btn-success')); ?>
 <hr>
 
 <h2>Listing <span class='muted'>Users</span></h2>

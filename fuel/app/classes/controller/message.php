@@ -18,21 +18,45 @@ class Controller_Message extends \Controller_Template
     {
         is_null(Session::get('is_sign_in')) and Response::redirect('404');
         
-        $data['messages'] = Model_Message::find(array(
-            'select' => array('*'),
+        $messages = Model_Message::find(array(
+            'select' => array(
+                'id',
+                'time',
+                'username',
+                'title',
+                'message'
+            ),
             'order_by' => array('id' => 'desc'),
         )); //find all the records in the table and order by id desc
         
         //$data['messages'] = Model_Message::find_all(); //find all the records in the table
         
+        $comments = array();
+        
+        foreach ($messages as $message) {
+            $results = DB::select()->from('comments')->where('message_id', $message->id)->execute();
+            
+            $comments[$message->id] = count($results);
+        }
+        
+        $view = View::forge('message/index');
+        
+        if (isset($messages)) {
+            $view->set('messages', $messages, true);
+            $view->set('comments', $comments, true);
+        }
+        
         $this->template->title = "Hello, \"".Session::get('username')."\"";
-        $this->template->content = View::forge('message/index', $data);
+        $this->template->content = $view;
+        
+        /* $this->template->title = "Hello, \"".Session::get('username')."\"";
+        $this->template->content = View::forge('message/index', $data); */
     }
     
     /**
-     * 將頁面導向views/message/view.php，內容為顯示在留言版上的單一訊息
+     * 將頁面導向views/message/view_message.php，內容為顯示在留言版上的單一訊息
      */
-    public function action_view($id = null)
+    public function action_view_message($id = null)
     {
         is_null(Session::get('is_sign_in')) and Response::redirect('404');
         
@@ -41,19 +65,47 @@ class Controller_Message extends \Controller_Template
         if ( ! $found_message = Model_Message::find_by_pk($id)) {
             Response::redirect('message');
         } else {
-            $this->template->set_global('found_message', $found_message, false);
+            $found_message_comments = Model_Comment::find(array(
+                'select' => array(
+                    'id',
+                    'time',
+                    'message_id',
+                    'username',
+                    'comment'
+                ),
+                'where' => array(
+                    array('message_id', '=', $found_message->id),
+                ),
+            ));
+            
+            /* echo '<pre>'; print_r($found_message_comments);
+            
+            exit; */
+            
+            $view = View::forge('message/view_message');
+            
+            $view->set_global('found_message', $found_message, true);
+            
+            if (isset($found_message_comments)) {
+                $view->set_global('found_message_comments', $found_message_comments, true);
+            }
             
             $this->template->title = "Message >> View";
-            $this->template->content = View::forge('message/view');
+            $this->template->content = $view;
+            
+            /* $this->template->set_global('found_message', $found_message, false);
+            
+            $this->template->title = "Message >> View";
+            $this->template->content = View::forge('message/view'); */
         }
     }
     
     /**
-     * 將頁面導向views/message/add.php，
+     * 將頁面導向views/message/add_message.php，
      * 若未建立新訊息時顯示建立新訊息的頁面，
      * 若使用者建立的標題或訊息長度不足時顯示錯誤訊息
      */
-    public function action_add()
+    public function action_add_message()
     {
         is_null(Session::get('is_sign_in')) and Response::redirect('404');
         
@@ -105,18 +157,18 @@ class Controller_Message extends \Controller_Template
         
         if ($is_title_or_message_too_short) {
             $this->template->title = "Message >> Add (Your Title And Message Should Be At Least \"1\" Character)";
-            $this->template->content = View::forge('message/add');
+            $this->template->content = View::forge('message/add_message');
         } else {
             $this->template->title = "Message >> Add";
-            $this->template->content = View::forge('message/add');
+            $this->template->content = View::forge('message/add_message');
         }
     }
     
     /**
-     * 將頁面導向views/message/edit.php，
+     * 將頁面導向views/message/edit_message.php，
      * 修改一則該使用者自己建立的訊息
      */
-    public function action_edit($id = null)
+    public function action_edit_message($id = null)
     {
         is_null(Session::get('is_sign_in')) and Response::redirect('404');
         
@@ -186,17 +238,17 @@ class Controller_Message extends \Controller_Template
         
         if ($is_title_or_message_too_short) {
             $this->template->title = "Message >> Edit (Your Title And Message Should Be At Least \"1\" Character)";
-            $this->template->content = View::forge('message/edit');
+            $this->template->content = View::forge('message/edit_message');
         } else {
             $this->template->title = "Message >> Edit";
-            $this->template->content = View::forge('message/edit');
+            $this->template->content = View::forge('message/edit_message');
         }
     }
     
     /**
      * 刪除一則該使用者自己建立的訊息
      */
-    public function action_delete($id = null)
+    public function action_delete_message($id = null)
     {
         is_null(Session::get('is_sign_in')) and Response::redirect('404');
         
@@ -233,5 +285,61 @@ class Controller_Message extends \Controller_Template
         }
         
         Response::redirect('message');
+    }
+    
+    /**
+     * 將頁面導向views/message/add_comment.php，
+     * 若未建立新訊息時顯示建立新訊息的頁面，
+     * 若使用者建立的標題或訊息長度不足時顯示錯誤訊息
+     */
+    public function action_add_comment($id = null)
+    {
+        is_null(Session::get('is_sign_in')) and Response::redirect('404');
+        
+        is_null($id) and Response::redirect('message');
+        
+        $is_comment_too_short = false;
+        
+        if (Input::method() == 'POST') {
+            $val = Model_Comment::validate('add_comment');
+            
+            /* echo '<pre>'; print_r($val);
+            
+            exit; */
+            
+            if ($val->run()) {
+                $message = Model_Comment::forge(array(
+                    'message_id' => $id,
+                    'username' => Session::get('username'),
+                    'comment' => Input::post('comment'),
+                ));
+                
+                if ($message && $message->save()) {
+                    //Model_CommentLog::save_log(Session::get('username'), 'C', '', Input::post('title'), '', Input::post('message'), '1');
+                    
+                    Session::set_flash('success', 'Added message # '.$message->id.'.');
+                    
+                    Response::redirect('message/view_message/'.$id);
+                } else {
+                    Session::set_flash('error', 'Could not save message.');
+                }
+            } else {
+                //Model_CommentLog::save_log(Session::get('username'), 'C', '', Input::post('title'), '', Input::post('message'), '0');
+                
+                $is_comment_too_short = true;
+                
+                Session::set_flash('error', $val->error());
+            }
+        }
+        
+        $this->template->set_global('message_id', $id, true);
+        
+        if ($is_comment_too_short) {
+            $this->template->title = "Message >> Add Comment (Your Comment Should Be At Least \"1\" Character)";
+            $this->template->content = View::forge('message/add_comment');
+        } else {
+            $this->template->title = "Message >> Add Comment";
+            $this->template->content = View::forge('message/add_comment');
+        }
     }
 }

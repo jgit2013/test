@@ -17,7 +17,7 @@
         </div>
         
         <div class="control-group">
-            <?php echo Form::label('Captcha', 'captcha', array('class'=>'control-label')); ?>
+            <?php echo Form::label('CAPTCHA', 'captcha', array('class'=>'control-label')); ?>
             
             <div class="controls">
                 <?php if ($captcha_driver == 'simplecaptcha'): ?>

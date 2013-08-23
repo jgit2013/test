@@ -35,8 +35,7 @@ class Controller_Main extends \Controller_Template
      */
     public function action_sign_in()
     {
-        $is_captcha_incorrect = false;
-        $is_username_or_password_incorrect = false;
+        $error_message = null;
         
         if (Input::method() == 'POST') {
             $is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
@@ -49,7 +48,7 @@ class Controller_Main extends \Controller_Template
                 );
                 
                 if (($found_user == 'ERROR') || ($found_user == 'NOT IN TABLE')) {
-                    $is_username_or_password_incorrect = true;
+                    $error_message = 'Incorrect Username Or Password';
                 } else {
                     Session::set('ip_address', Input::real_ip());
                     
@@ -74,18 +73,21 @@ class Controller_Main extends \Controller_Template
                         Response::redirect('message');
                     }
                 }
+            } else {
+                $error_message = 'CAPTCHA Is Incorrect';
             }
+        }
+        
+        $view = View::forge('main/sign_in');
+        
+        if (isset($error_message)) {
+            $view->set('error_message', $error_message, false);
         }
         
         $this->template->set_global('captcha_driver', $this->captcha_driver, false);
         
-        if ($is_captcha_incorrect || $is_username_or_password_incorrect) {
-            $this->template->title = "Sign In >> Incorrect Username Or Password";
-            $this->template->content = View::forge('main/sign_in');
-        } else {
-            $this->template->title = "Sign In >> Admin User: Username=admin, Password=admin";
-            $this->template->content = View::forge('main/sign_in');
-        }
+        $this->template->title = "Sign In";
+        $this->template->content = $view;
     }
     
     /**
@@ -124,15 +126,13 @@ class Controller_Main extends \Controller_Template
     }
     
     /**
-     * 將頁面導向views/main/create_user.php，
+     * 將頁面導向views/main/sign_up.php，
      * 若未建立新使用者時顯示建立新使用者的頁面， 
      * 若使用者名稱或密碼長度不足時顯示錯誤訊息
      */
-    public function action_create_user()
+    public function action_sign_up()
     {
-        $is_captcha_incorrect = false;
-        $is_username_in_use = false;
-        $is_username_or_password_too_short = false;
+        $error_message = null;
         
         if (Input::method() == 'POST') {
             $is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
@@ -145,32 +145,29 @@ class Controller_Main extends \Controller_Template
                 );
                 
                 if ($new_user == 'ERROR') {
-                    $is_username_or_password_too_short = true;
+                    $error_message = 'Your Username Should Be At Least \"1\" Character, And Your Password Should Be At Least \"4\" Characters';
                 } else if ($new_user == 'IN USE') {
-                    $is_username_in_use = true;
+                    $error_message= 'Your Username Is Already In Use';
                 } else {
                     $new_user->save();
                     
-                    Response::redirect('main/go');
+                    Response::redirect('go');
                 }
+            } else {
+                $error_message = 'CAPTCHA Is Incorrect';
             }
+        }
+        
+        $view = View::forge('main/sign_up');
+        
+        if (isset($error_message)) {
+            $view->set('error_message', $error_message, false);
         }
         
         $this->template->set_global('captcha_driver', $this->captcha_driver, false);
         
-        if ($is_captcha_incorrect || $is_username_or_password_too_short) {
-            $this->template->title = "Create A New User >> Your Username Should Be At Least \"1\" Character,
-                                                     And Your Password Should Be At Least \"4\" Characters";
-            $this->template->content = View::forge('main/create_user');
-        } else {
-            if ($is_username_in_use) {
-                $this->template->title = "Create A New User >> Your Username Is Already In Use";
-                $this->template->content = View::forge('main/create_user');
-            } else {
-                $this->template->title = "Create A New User";
-                $this->template->content = View::forge('main/create_user');
-            }
-        }
+        $this->template->title = "Sign Up";
+        $this->template->content = $view;
     }
     
     /**
@@ -178,7 +175,7 @@ class Controller_Main extends \Controller_Template
      */
     public function action_go()
     {
-        $this->template->title = "Create Successfully, Please Sign In";
+        $this->template->title = "Success, Please Sign In";
         $this->template->content = View::forge('main/go');
     }
 }

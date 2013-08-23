@@ -36,7 +36,7 @@
             <label class='control-label'>&nbsp;</label>
             
             <div class='controls'>
-                <?php echo Html::anchor('message/view/'.$found_message->id, 'View', array('class' => 'btn btn-primary')); ?>
+                <?php echo Html::anchor('message/view_message/'.$found_message->id, 'View', array('class' => 'btn btn-primary')); ?>
                  | <?php echo Form::submit('submit', 'Save', array('class' => 'btn btn-primary')); ?>
                  | <?php echo Html::anchor('message', 'Back', array('class' => 'btn btn-primary')); ?>
             </div>
