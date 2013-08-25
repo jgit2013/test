@@ -19,14 +19,38 @@ class Controller_Admin extends \Controller_Template
 	        Response::redirect('404');
 	    }
 	    
-		$data['users'] = Model_User::find_all();
-		$data['messages'] = Model_Message::find(array(
-		    'select' => array('*'),
-		    'order_by' => array('id' => 'desc'),
-		));
-		
-		$this->template->title = "Admin >> Control Panel";
-		$this->template->content = View::forge('admin/index', $data);
+	    $users = Model_User::find(array(
+	        'select' => array(
+	            'id',
+	            'username',
+	            'password',
+	            'is_admin'
+	        ),
+	    ));
+	    
+	    $messages = Model_Message::find(array(
+	        'select' => array(
+	            'id',
+	            'time',
+	            'username',
+	            'title',
+	            'message'
+	        ),
+	        'order_by' => array('id' => 'desc'),
+	    ));
+	    
+	    $view = View::forge('admin/index');
+	    
+	    if (isset($users)) {
+	        $view->set('users', $users, true);
+	    }
+	    
+	    if (isset($messages)) {
+	        $view->set('messages', $messages, true);
+	    }
+	    
+	    $this->template->title = "Admin >> Control Panel";
+	    $this->template->content = $view;
 	}
 	
 	/**
@@ -38,7 +62,7 @@ class Controller_Admin extends \Controller_Template
 	        Response::redirect('404');
 	    }
 	    
-	    $data = null;
+	    $found_user_logs = null;
 	    
 	    if (Input::method() == 'POST') {
 	        $input = Model_UserLog::forge(array(
@@ -49,39 +73,55 @@ class Controller_Admin extends \Controller_Template
 	        ));
 	        
 	        $conditions = null;
-	        
+	         
 	        if ($input->ip_address != '') {
 	            $conditions[] = array('ip_address', 'like', '%'.$input->ip_address.'%');
 	        }
-	        
+	         
 	        if ($input->username != '') {
 	            $conditions[] = array('username', '=', $input->username);
 	        }
-	        
+	         
 	        if ($input->sign_in_time != '') {
 	            $conditions[] = array('sign_in_time', 'like', '%'.$input->sign_in_time.'%');
 	        }
-	        
+	         
 	        if ($input->sign_out_time != '') {
 	            $conditions[] = array('sign_out_time', 'like', '%'.$input->sign_out_time.'%');
 	        }
-	        
-	        $data['logs'] = Model_UserLog::find(array(
-	            'select' => array('*'),
-	            'where' => $conditions,
-	            'order_by' => array(
-	                'id' => 'desc',
+	         
+	        $found_user_logs = Model_UserLog::find(array(
+	            'select' => array(
+	                'ip_address',
+	                'username',
+	                'sign_in_time',
+	                'sign_out_time',
+	                'during'
 	            ),
+	            'where' => $conditions,
+	            'order_by' => array('id' => 'desc',),
 	        ));
 	    } else {
-	        $data['logs'] = Model_UserLog::find(array(
-	            'select' => array('*'),
+	        $found_user_logs = Model_UserLog::find(array(
+	            'select' => array(
+	                'ip_address',
+	                'username',
+	                'sign_in_time',
+	                'sign_out_time',
+	                'during'
+	            ),
 	            'order_by' => array('id' => 'desc'),
 	        ));
 	    }
 	    
+	    $view = View::forge('admin/view_user_logs');
+	    
+	    if (isset($found_user_logs)) {
+	        $view->set('found_user_logs', $found_user_logs, true);
+	    }
+	    
 	    $this->template->title = "Admin >> View User Logs";
-	    $this->template->content = View::forge('admin/view_user_logs', $data);
+	    $this->template->content = $view;
 	}
 	
 	/**
@@ -93,7 +133,7 @@ class Controller_Admin extends \Controller_Template
 	        Response::redirect('404');
 	    }
 	    
-	    $data = null;
+	    $found_message_logs = null;
 	    
 	    if (Input::method() == 'POST') {
 	        $input = Model_MessageLog::forge(array(
@@ -141,22 +181,44 @@ class Controller_Admin extends \Controller_Template
 	            $conditions[] = array('is_succeed', '=', $input->is_succeed);
 	        }
 	        
-	        $data['logs'] = Model_MessageLog::find(array(
-	            'select' => array('*'),
-	            'where' => $conditions,
-	            'order_by' => array(
-	                'id' => 'desc',
+	        $found_message_logs = Model_MessageLog::find(array(
+	            'select' => array(
+	                'time',
+	                'username',
+	                'action',
+	                'before_title',
+	                'after_title',
+	                'before_message',
+	                'after_message',
+	                'is_succeed'
 	            ),
+	            'where' => $conditions,
+	            'order_by' => array('id' => 'desc',),
 	        ));
 	    } else {
-	        $data['logs'] = Model_MessageLog::find(array(
-	            'select' => array('*'),
+	        $found_message_logs = Model_MessageLog::find(array(
+	            'select' => array(
+	                'time',
+	                'username',
+	                'action',
+	                'before_title',
+	                'after_title',
+	                'before_message',
+	                'after_message',
+	                'is_succeed'
+	            ),
 	            'order_by' => array('id' => 'desc'),
 	        ));
 	    }
 	    
+	    $view = View::forge('admin/view_message_logs');
+	    
+	    if (isset($found_message_logs)) {
+	        $view->set('found_message_logs', $found_message_logs, true);
+	    }
+	    
 	    $this->template->title = "Admin >> View Message Logs";
-	    $this->template->content = View::forge('admin/view_message_logs', $data);
+	    $this->template->content = $view;
 	}
 	
 	/**
@@ -172,10 +234,6 @@ class Controller_Admin extends \Controller_Template
 	    
 	    if ($user = Model_User::find_by_pk($id)) {
 	        $user->delete();
-	        
-	        Session::set_flash('success', 'Deleted user # '.$id);
-	    } else {
-	        Session::set_flash('error', 'Could not delete user # '.$id);
 	    }
 	    
 	    Response::redirect('admin');

@@ -9,18 +9,10 @@
         </div>
         
         <div class="control-group">
-            <?php echo Form::label('Title', 'title', array('class'=>'control-label')); ?>
+            <?php echo Form::label('Comment', 'comment', array('class'=>'control-label')); ?>
             
             <div class="controls">
-                <?php echo Form::input('title', Input::post('title', isset($add_message) ? $add_message->title : ''), array('class' => 'span4', 'placeholder'=>'Title')); ?>
-            </div>
-        </div>
-        
-        <div class="control-group">
-            <?php echo Form::label('Message', 'message', array('class'=>'control-label')); ?>
-            
-            <div class="controls">
-                <?php echo Form::textarea('message', Input::post('message', isset($add_message) ? $add_message->message : ''), array('class' => 'span8', 'rows' => 8, 'placeholder'=>'Message')); ?>
+                <?php echo Form::textarea('comment', Input::post('comment', isset($add_comment) ? $add_comment->comment : ''), array('class' => 'span8', 'rows' => 8, 'placeholder'=>'Comment')); ?>
             </div>
         </div>
         
@@ -29,7 +21,7 @@
             
             <div class='controls'>
                 <?php echo Form::submit('submit', 'Add', array('class' => 'btn btn-primary')); ?>
-                | <?php echo Html::anchor('message', 'Back', array('class' => 'btn btn-primary')); ?>
+                 | <?php echo Html::anchor('common/view_message/'.$message_id, 'Back', array('class' => 'btn btn-primary')); ?>
             </div>
         </div>
     </fieldset>

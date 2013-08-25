@@ -8,7 +8,7 @@
  */
 class Controller_Main extends \Controller_Template
 {
-    private $captcha_driver = 'recaptcha';
+    private $captcha_driver = 'simplecaptcha';
     
     /**
      * 將頁面導向views/main/index.php，
@@ -20,7 +20,7 @@ class Controller_Main extends \Controller_Template
             if (Session::get('is_admin') == '1') {
                 Response::redirect('admin');
             } else {
-                Response::redirect('message');
+                Response::redirect('user');
             }
         }
         
@@ -70,7 +70,7 @@ class Controller_Main extends \Controller_Template
                     } else {
                         Session::set('is_admin', '0');
                     
-                        Response::redirect('message');
+                        Response::redirect('user');
                     }
                 }
             } else {

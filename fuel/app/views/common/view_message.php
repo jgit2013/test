@@ -1,4 +1,4 @@
-<?php echo render('message/_form_view_message'); ?>
+<?php echo render('common/_form_view_message'); ?>
 <hr>
 <h2>Listing <span class='muted'>Comments</span></h2>
 <br>
@@ -35,11 +35,15 @@
                     
                     <div class='controls'>
                         <?php if ($found_message_comment->username == Session::get('username')): ?>
-                            <?php echo Html::anchor('message/edit_comment/'.$found_message_comment->id, 'Edit', array('class' => 'btn btn-primary')); ?> | 
-                            <?php echo Html::anchor('message/delete_comment/'.$found_message_comment->id, 'Delete', array('class' => 'btn btn-primary', 'onclick' => "return confirm('Are you sure?')")); ?> | 
+                            <?php echo Html::anchor('common/edit_comment/'.$found_message_comment->id, 'Edit', array('class' => 'btn btn-primary')); ?>
+                             | <?php echo Html::anchor('common/delete_comment/'.$found_message_comment->id, 'Delete', array('class' => 'btn btn-primary', 'onclick' => "return confirm('Are you sure?')")); ?> | 
                         <?php endif; ?>
                         
-                        <?php echo Html::anchor('message', 'Back', array('class' => 'btn btn-primary')); ?>
+                        <?php if (Session::get('is_admin') == '1'): ?>
+                            <?php echo Html::anchor('admin', 'Back', array('class' => 'btn btn-primary')); ?>
+                        <?php else: ?>
+                            <?php echo Html::anchor('user', 'Back', array('class' => 'btn btn-primary')); ?>
+                        <?php endif; ?>
                     </div>
                 </div>
             </fieldset>

@@ -37,11 +37,16 @@
             
             <div class='controls'>
                 <?php if ($found_message->username == Session::get('username')): ?>
-                    <?php echo Html::anchor('message/edit_message/'.$found_message->id, 'Edit', array('class' => 'btn btn-primary')); ?> |
+                    <?php echo Html::anchor('common/edit_message/'.$found_message->id, 'Edit', array('class' => 'btn btn-primary')); ?> |
                 <?php endif; ?>
                 
-                <?php echo Html::anchor('message/add_comment/'.$found_message->id, 'Add Comment', array('class' => 'btn btn-primary')); ?>
-                <?php echo Html::anchor('message', 'Back', array('class' => 'btn btn-primary')); ?>
+                <?php echo Html::anchor('common/add_comment/'.$found_message->id, 'Add Comment', array('class' => 'btn btn-primary')); ?>
+                
+                <?php if (Session::get('is_admin') == '1'): ?>
+                     | <?php echo Html::anchor('admin', 'Back', array('class' => 'btn btn-primary')); ?>
+                <?php else: ?>
+                     | <?php echo Html::anchor('user', 'Back', array('class' => 'btn btn-primary')); ?>
+                <?php endif; ?>
             </div>
         </div>
     </fieldset>

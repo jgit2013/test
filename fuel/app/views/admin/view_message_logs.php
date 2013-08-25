@@ -5,7 +5,7 @@
 <hr>
 
 <h2>Listing <span class='muted'>Logs</span></h2>
-<?php if ($logs): ?>
+<?php if ($found_message_logs): ?>
 <table class="table table-striped">
 	<thead>
 		<tr>
@@ -21,16 +21,16 @@
 		</tr>
 	</thead>
 	<tbody>
-        <?php foreach ($logs as $log): ?>
+        <?php foreach ($found_message_logs as $found_message_log): ?>
             <tr>
-                <td><?php echo $log->time; ?></td>
-                <td><?php echo $log->username; ?></td>
-                <td><?php echo $log->action; ?></td>
-                <td><?php echo $log->before_title; ?></td>
-                <td><?php echo $log->after_title; ?></td>
-                <td><?php echo $log->before_message; ?></td>
-                <td><?php echo $log->after_message; ?></td>
-                <td><?php echo $log->is_succeed; ?></td>
+                <td><?php echo $found_message_log->time; ?></td>
+                <td><?php echo $found_message_log->username; ?></td>
+                <td><?php echo $found_message_log->action; ?></td>
+                <td><?php echo $found_message_log->before_title; ?></td>
+                <td><?php echo $found_message_log->after_title; ?></td>
+                <td><?php echo $found_message_log->before_message; ?></td>
+                <td><?php echo $found_message_log->after_message; ?></td>
+                <td><?php echo $found_message_log->is_succeed; ?></td>
             </tr>
         <?php endforeach; ?>
     </tbody>
