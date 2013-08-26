@@ -5,7 +5,7 @@
 <hr>
 
 <h2>Listing <span class='muted'>Logs</span></h2>
-<?php if ($found_message_logs): ?>
+<?php if (isset($found_message_logs)): ?>
 <table class="table table-striped">
 	<thead>
 		<tr>

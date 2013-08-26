@@ -1,5 +1,5 @@
 <p>
-    <?php echo Html::anchor('common/add_message', 'Add New Message', array('class' => 'btn btn-success')); ?>
+    <?php echo Html::anchor('add_message', 'Add New Message', array('class' => 'btn btn-success')); ?>
      | <?php echo Html::anchor('sign_out', 'Sign Out', array('class' => 'btn btn-success')); ?>
 </p>
 <hr>
@@ -27,10 +27,10 @@
                 <td><?php echo $message->message; ?></td>
                 <td><?php echo $comments[$message->id]; ?></td>
                 <td>
-                    <?php echo Html::anchor('common/view_message/'.$message->id, '<i class="icon-eye-open" title="View"></i>'); ?>
+                    <?php echo Html::anchor('view_message/'.$message->id, '<i class="icon-eye-open" title="View"></i>'); ?>
                     <?php if ($message->username == Session::get('username')): ?>
-                         | <?php echo Html::anchor('common/edit_message/'.$message->id, '<i class="icon-wrench" title="Edit"></i>'); ?>
-                         | <?php echo Html::anchor('common/delete_message/'.$message->id, '<i class="icon-trash" title="Delete"></i>', array('onclick' => "return confirm('Are you sure?')")); ?>
+                         | <?php echo Html::anchor('edit_message/'.$message->id, '<i class="icon-wrench" title="Edit"></i>'); ?>
+                         | <?php echo Html::anchor('delete_message/'.$message->id, '<i class="icon-trash" title="Delete"></i>', array('onclick' => "return confirm('Are you sure?')")); ?>
                     <?php endif; ?>
                 </td>
             </tr>

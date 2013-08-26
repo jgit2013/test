@@ -39,6 +39,14 @@ class Controller_Admin extends \Controller_Template
 	        'order_by' => array('id' => 'desc'),
 	    ));
 	    
+	    $comments = array();
+	    
+	    foreach ($messages as $message) {
+	        $results = DB::select()->from('comments')->where('message_id', $message->id)->execute();
+	    
+	        $comments[$message->id] = count($results);
+	    }
+	    
 	    $view = View::forge('admin/index');
 	    
 	    if (isset($users)) {
@@ -47,6 +55,7 @@ class Controller_Admin extends \Controller_Template
 	    
 	    if (isset($messages)) {
 	        $view->set('messages', $messages, true);
+	        $view->set('comments', $comments, true);
 	    }
 	    
 	    $this->template->title = "Admin >> Control Panel";
@@ -234,220 +243,6 @@ class Controller_Admin extends \Controller_Template
 	    
 	    if ($user = Model_User::find_by_pk($id)) {
 	        $user->delete();
-	    }
-	    
-	    Response::redirect('admin');
-	}
-	
-	/**
-	 * 將頁面導向views/admin/view_message.php，內容為顯示在留言版上的單一訊息
-	 */
-	public function action_view_message($id = null)
-	{
-	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
-	        Response::redirect('404');
-	    }
-	    
-	    is_null($id) and Response::redirect('admin');
-	    
-	    if ( ! $found_message = Model_Message::find_by_pk($id)) {
-	        Response::redirect('admin');
-	    } else {
-	        $this->template->set_global('found_message', $found_message, false);
-	        
-	        $this->template->title = "Admin >> View Message";
-	        $this->template->content = View::forge('admin/view_message');
-	    }
-	}
-	
-	/**
-	 * 將頁面導向views/admin/add_message.php，
-	 * 若未建立新訊息時顯示建立新訊息的頁面，
-	 * 若使用者建立的標題或訊息長度不足時顯示錯誤訊息
-	 */
-	public function action_add_message()
-	{
-	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
-	        Response::redirect('404');
-	    }
-	    
-	    $is_title_or_message_too_short = false;
-	    
-	    if (Input::method() == 'POST') {
-	        $val = Model_Message::validate('add_message');
-	        
-	        if ($val->run()) {
-	            $message = Model_Message::forge(array(
-	                'username' => Session::get('username'),
-	                'title' => Input::post('title'),
-	                'message' => Input::post('message'),
-	            ));
-	            
-	            if ($message && $message->save()) {
-	                Model_MessageLog::save_log(
-	                    Session::get('username'),
-	                    'C',
-	                    '',
-	                    Input::post('title'),
-	                    '',
-	                    Input::post('message'),
-	                    '1'
-	                );
-	                
-	                Session::set_flash('success', 'Added message # '.$message->id.'.');
-	                
-	                Response::redirect('admin');
-	            } else {
-	                Session::set_flash('error', 'Could not save message.');
-	            }
-	        } else {
-	            Model_MessageLog::save_log(
-	                Session::get('username'),
-	                'C',
-	                '',
-	                Input::post('title'),
-	                '',
-	                Input::post('message'),
-	                '0'
-	            );
-	            
-	            $is_title_or_message_too_short = true;
-	            
-	            Session::set_flash('error', $val->error());
-	        }
-	    }
-	    
-	    if ($is_title_or_message_too_short) {
-	        $this->template->title = "Admin >> Add Message (The Title And Message Should Be At Least \"1\" Character)";
-	        $this->template->content = View::forge('admin/add_message');
-	    } else {
-	        $this->template->title = "Admin >> Add Message";
-	        $this->template->content = View::forge('admin/add_message');
-	    }
-	}
-	
-	/**
-	 * 將頁面導向views/admin/edit_message.php，修改一則所選的訊息
-	 */
-	public function action_edit_message($id = null)
-	{
-	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
-	        Response::redirect('404');
-	    }
-	    
-	    is_null($id) and Response::redirect('admin');
-	    
-	    $before_title = null;
-	    $before_message = null;
-	    
-	    if ( ! $found_message = Model_Message::find_by_pk($id)) {
-	        Session::set_flash('error', 'Could not find message # '.$id);
-	        
-	        Response::redirect('admin');
-	    } else {
-	        $before_title = $found_message->title;
-	        $before_message = $found_message->message;
-	    }
-	    
-	    $is_title_or_message_too_short = false;
-	    
-	    if (Input::method() == 'POST') {
-	        $val = Model_Message::validate('edit_message');
-	        
-
-	        if ($val->run()) {
-	            $found_message->title = Input::post('title');
-	            $found_message->message = Input::post('message');
-	            
-	            if ($found_message->save()) {
-	                Model_MessageLog::save_log(
-	                    Session::get('username'),
-	                    'U',
-	                    $before_title,
-	                    Input::post('title'),
-	                    $before_message,
-	                    Input::post('message'),
-	                    '1'
-	                );
-	                
-	                Session::set_flash('success', 'Updated message # '. $id);
-	                
-	                Response::redirect('admin');
-	            } else {
-	                Session::set_flash('error', 'Could not update message # '. $id);
-	            }
-	        } else {
-	            Model_MessageLog::save_log(
-	                Session::get('username'),
-	                'U',
-	                $before_title,
-	                Input::post('title'),
-	                $before_message,
-	                Input::post('message'),
-	                '0'
-	            );
-	            
-	            if (Input::method() == 'POST') {
-	                $found_message->title = $val->validated('title');
-	                $found_message->message = $val->validated('message');
-	                
-	                Session::set_flash('error', $val->error());
-	            }
-	            
-	            $is_title_or_message_too_short = true;
-	        }
-	    }
-	    
-	    $this->template->set_global('found_message', $found_message, false);
-	    
-	    if ($is_title_or_message_too_short) {
-	        $this->template->title = "Admin >> Edit Message (The Title And Message Should Be At Least \"1\" Character)";
-	        $this->template->content = View::forge('admin/edit_message');
-	    } else {
-	        $this->template->title = "Admin >> Edit Message";
-	        $this->template->content = View::forge('admin/edit_message');
-	    }
-	}
-	
-	/**
-	 * 刪除一則所選的訊息
-	 */
-	public function action_delete_message($id = null)
-	{
-	    if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '0')) {
-	        Response::redirect('404');
-	    }
-	    
-	    is_null($id) and Response::redirect('admin');
-	    
-	    if ($message = Model_Message::find_by_pk($id)) {
-	        $is_log_save_successfully = Model_MessageLog::save_log(
-	            Session::get('username'),
-	            'D',
-	            $message->title,
-	            '',
-	            $message->message,
-	            '',
-	            '1'
-	        );
-	        
-	        if ( ! $is_log_save_successfully) {
-	            Model_MessageLog::save_log(
-	                Session::get('username'),
-	                'D',
-	                $message->title,
-	                '',
-	                $message->message,
-	                '',
-	                '0'
-	            );
-	        }
-	        
-	        $message->delete();
-	        
-	        Session::set_flash('success', 'Deleted message # '.$id);
-	    } else {
-	        Session::set_flash('error', 'Could not delete message # '.$id);
 	    }
 	    
 	    Response::redirect('admin');

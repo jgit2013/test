@@ -8,7 +8,7 @@
  */
 class Controller_Main extends \Controller_Template
 {
-    private $captcha_driver = 'simplecaptcha';
+    private $captcha_driver = 'recaptcha';
     
     /**
      * 將頁面導向views/main/index.php，
@@ -95,6 +95,8 @@ class Controller_Main extends \Controller_Template
      */
     public function action_sign_out()
     {
+        is_null(Session::get('is_sign_in')) and Response::redirect('404');
+        
         $ip_address = Session::get('ip_address');
         
         $username = Session::get('username');

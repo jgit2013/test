@@ -21,7 +21,7 @@
                     <td><?php echo $user->password; ?></td>
                     <td>
                         <?php if ($user->is_admin == 0): ?>
-                        <?php echo Html::anchor('admin/delete_user/'.$user->id, '<i class="icon-trash" title="Delete"></i>', array('onclick' => "return confirm('Are you sure?')")); ?>
+                        <?php echo Html::anchor('delete_user/'.$user->id, '<i class="icon-trash" title="Delete"></i>', array('onclick' => "return confirm('Are you sure?')")); ?>
                         <?php endif ?>
                     </td>
                 </tr>
@@ -43,6 +43,7 @@
                 <th>User</th>
                 <th>Title</th>
                 <th>Message</th>
+                <th>Comment</th>
                 <th>&nbsp;</th>
             </tr>
         </thead>
@@ -53,10 +54,11 @@
                     <td><?php echo $message->username; ?></td>
                     <td><?php echo $message->title; ?></td>
                     <td><?php echo $message->message; ?></td>
+                    <td><?php echo $comments[$message->id]; ?></td>
                     <td>
-                        <?php echo Html::anchor('admin/view_message/'.$message->id, '<i class="icon-eye-open" title="View"></i>'); ?>
-                         | <?php echo Html::anchor('admin/edit_message/'.$message->id, '<i class="icon-wrench" title="Edit"></i>'); ?>
-                         | <?php echo Html::anchor('admin/delete_message/'.$message->id, '<i class="icon-trash" title="Delete"></i>', array('onclick' => "return confirm('Are you sure?')")); ?>
+                        <?php echo Html::anchor('view_message/'.$message->id, '<i class="icon-eye-open" title="View"></i>'); ?>
+                         | <?php echo Html::anchor('edit_message/'.$message->id, '<i class="icon-wrench" title="Edit"></i>'); ?>
+                         | <?php echo Html::anchor('delete_message/'.$message->id, '<i class="icon-trash" title="Delete"></i>', array('onclick' => "return confirm('Are you sure?')")); ?>
                     </td>
                 </tr>
             <?php endforeach; ?>
