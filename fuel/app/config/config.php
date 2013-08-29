@@ -179,6 +179,7 @@ return array(
 			'Fuel\\Core\\View',
 			'Fuel\\Core\\ViewModel',
 			'Closure',
+			'Fuel\\Core\\Redis',  //for testing
 		),
 	),
 
@@ -272,6 +273,7 @@ return array(
 		 */
 		 'packages'  => array(
 		      'captcha',
+		      'dom',
 		// 	//'orm',
 		 ),
 

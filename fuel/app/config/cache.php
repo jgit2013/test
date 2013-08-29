@@ -29,7 +29,7 @@ return array(
 	 */
 
 	// default storage driver
-	'driver'      => 'file',
+	'driver'      => 'redis',
 
 	// default expiration (null = no expiration)
 	'expiration'  => null,
