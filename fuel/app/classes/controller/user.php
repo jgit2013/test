@@ -20,30 +20,39 @@ class Controller_User extends \Controller_Template
             Response::redirect('404');
         }
         
-        $messages = Model_Message::find(array(
-            'select' => array(
-                'id',
-                'time',
-                'username',
-                'title',
-                'message'
-            ),
-            'order_by' => array('id' => 'desc'),
-        )); //find all the records in the table and order by id desc
+        $response = Tool_Ask::request_curl(
+            'api/find_messages',
+            'json',
+            'get',
+            array(
+                'select' => array(
+                    'id',
+                    'time',
+                    'username',
+                    'title',
+                    'message'
+                ),
+                'order_by' => array('id' => 'desc')
+            )
+        );
         
-        //$data['messages'] = Model_Message::find_all(); //find all the records in the table
+        $body_json = $response->body();
+        
+        $body_array = json_decode($body_json);
+        
+        $messages = $body_array->data;
         
         $comments = array();
-        
-        foreach ($messages as $message) {
-            $results = DB::select()->from('comments')->where('message_id', $message->id)->execute();
-            
-            $comments[$message->id] = count($results);
-        }
         
         $view = View::forge('user/index');
         
         if (isset($messages)) {
+            foreach ($messages as $message) {
+                $results = DB::select()->from('comments')->where('message_id', $message->id)->execute();
+                
+                $comments[$message->id] = count($results);
+            }
+            
             $view->set('messages', $messages, true);
             $view->set('comments', $comments, true);
         }

@@ -3,78 +3,659 @@ class Controller_Api extends \Controller_Rest
 {
     protected $format = 'json';
     
-    public function get_index()
+    public function post_sign_in()
     {
-        if (Input::get('id')) {
-            $user = Model_User::find_by_pk(Input::get('id'));
-            
-            if ($user) {
-                $respuesta = array(
-                    "success" => "true",
-                    "data" => $user
-                );
-                
-                $this->response($respuesta, 200);
-            } else {
-                $respuesta = array(
-                    "error" => "true",
-                    "msg" => 'id is incorrect'
-                );
-                
-                $this->response($respuesta, 404);
-            }
+        $found_user = Model_User::check_user(
+            Input::post('username'),
+            Input::post('password'),
+            'IN TABLE'
+        );
+        
+        $body = null;
+        
+        if (($found_user == 'ERROR') || ($found_user == 'NOT IN TABLE')) {
+            $body = array(
+                "success" => "false",
+                "msg" => "Incorrect Username Or Password",
+                "data" => null
+            );
         } else {
-            $users = Model_User::find_all();
-            
-            if ($users) {
-                $respuesta = array(
-                    "success" => "true",
-                    "data" => $users
-                );
-                
-                $this->response($respuesta, 200);
-            } else {
-                $respuesta = array(
-                    "error" => "true",
-                    "msg" => 'No Users'
-                );
-                
-                $this->response($respuesta, 404);
-            }
+            $body = array(
+                "success" => "true",
+                "msg" => "User Found",
+                "data" => $found_user
+            );
         }
+        
+        $this->response($body, 200);
     }
     
-    function delete_index()
+    public function post_sign_up()
     {
-        if (Input::get('id')) {
-            $user = Model_User::find_by_pk(Input::get('id'));
+        $new_user = Model_User::check_user(
+            Input::post('username'),
+            Input::post('password'),
+            'IN USE'
+        );
+        
+        $body = null;
+        
+        if ($new_user == 'ERROR') {
+            $body = array(
+                "success" => "false",
+                "msg" => "Your Username Should Be At Least \"1\" Character, And Your Password Should Be At Least \"4\" Characters",
+                "data" => null
+            );
+        } else if ($new_user == 'IN USE') {
+            $body = array(
+                "success" => "false",
+                "msg" => "Your Username Is Already In Use",
+                "data" => null
+            );
+        } else {
+            $new_user->save();
             
-            if ($user) {
-                $user->delete();
+            $body = array(
+                "success" => "true",
+                "msg" => "Create The User",
+                "data" => null
+            );
+        }
+        
+        $this->response($body, 200);
+    }
+    
+    public function post_delete_user()
+    {
+        $is_deleted = false;
+        
+        $id = Input::post('id');
+        
+        if ($found_user = Model_User::find_by_pk($id)) {
+            $found_user->delete();
+            
+            $is_deleted = true;
+        }
+        
+        $body = null;
+        
+        if ($is_deleted) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The User Is Deleted",
+                "data" => null
+            );
+        } else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Can't Delete The User",
+                "data" => $id
+            );
+        }
+        
+        $this->response($body, 200);
+    }
+    
+    public function post_find_user_logs()
+    {
+        $conditions = array();
+        
+        if (Input::post('select') != null) {
+            $conditions['select'] = Input::post('select');
+        }
+        
+        if (Input::post('where') != null) {
+            $conditions['where'] = Input::post('where');
+        }
+        
+        if (Input::post('order_by') != null) {
+            $conditions['order_by'] = Input::post('order_by');
+        }
+        
+        $user_logs = Model_UserLog::find($conditions);
+        
+        $body = null;
+        
+        if (isset($user_logs)) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The User Logs Are Found",
+                "data" => $user_logs
+            );
+        } else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Can't Find The User Logs",
+                "data" => null
+            );
+        }
+        
+        $this->response($body, 200);
+    }
+    
+    public function post_add_message()
+    {
+        $is_saved = false;
+        
+        $username = Input::post('username');
+        $title = Input::post('title');
+        $message = Input::post('message');
+        
+        $val = Model_Message::validate('add_message');
+        
+        if ($val->run()) {
+            $new_message = Model_Message::forge(array(
+                'username' => $username,
+                'title' => $title,
+                'message' => $message
+            ));
+            
+            if (isset($new_message) && $new_message->save()) {
+                Model_MessageLog::save_log(
+                    $username,
+                    'C',
+                    '',
+                    $title,
+                    '',
+                    $message,
+                    '1'
+                );
                 
-                $respuesta = array(
-                    "success" => "true",
-                    "data" => array(
-                        'msg' => 'User Delete'
+                $is_saved = true;
+            } else {
+                Model_MessageLog::save_log(
+                    $username,
+                    'C',
+                    '',
+                    $title,
+                    '',
+                    $message,
+                    '0'
+                );
+            }
+        } else {
+            Model_MessageLog::save_log(
+                $username,
+                'C',
+                '',
+                $title,
+                '',
+                $message,
+                '0'
+            );
+        }
+        
+        $body = null;
+        
+        if ($is_saved) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The Message Is Saved",
+                "data" => null
+            );
+        } else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Your <span class='muted'>Title</span> And
+                                   <span class='muted'>Message</span> Should Be At Least
+                                   <span class='muted'>\"1\"</span> Character",
+                "data" => null
+            );
+        }
+        
+        $this->response($body, 200);
+    }
+    
+    public function post_edit_message()
+    {
+        $is_message_not_found = false;
+        $is_edited = false;
+        
+        $id = Input::post('id');
+        
+        $username = Input::post('username');
+        $after_title = Input::post('title');
+        $after_message = Input::post('message');
+        
+        $before_title = null;
+        $before_message = null;
+        
+        if ( ! $message = Model_Message::find_by_pk($id)) {
+            $is_message_not_found = true;
+        } else {
+            $before_title = $message->title;
+            $before_message = $message->message;
+        }
+        
+        if ( ! $is_message_not_found) {
+            $val = Model_Message::validate('edit_message');
+            
+            if ($val->run()) {
+                $message->title = $after_title;
+                $message->message = $after_message;
+                
+                $message->save();
+                
+                Model_MessageLog::save_log(
+                    $username,
+                    'U',
+                    $before_title,
+                    $after_title,
+                    $before_message,
+                    $after_message,
+                    '1'
+                );
+                
+                $is_edited = true;
+            } else {
+                Model_MessageLog::save_log(
+                    $username,
+                    'U',
+                    $before_title,
+                    $after_title,
+                    $before_message,
+                    $after_message,
+                    '0'
+                );
+            }
+        }
+        
+        $body = null;
+        
+        if ($is_edited) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The Message Is Edited",
+                "data" => $message
+            );
+        } else if ($is_message_not_found) {
+            $body = array(
+                "success" => "false",
+                "msg" => "Can't Find The Message",
+                "data" => $id
+            );
+        } else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Your <span class='muted'>Title</span> And
+                                   <span class='muted'>Message</span> Should Be At Least
+                                   <span class='muted'>\"1\"</span> Character",
+                "data" => null
+            );
+        }
+        
+        $this->response($body, 200);
+    }
+    
+    public function post_find_message_logs()
+    {
+        $conditions = array();
+        
+        if (Input::post('select') != null) {
+            $conditions['select'] = Input::post('select');
+        }
+        
+        if (Input::post('where') != null) {
+            $conditions['where'] = Input::post('where');
+        }
+        
+        if (Input::post('order_by') != null) {
+            $conditions['order_by'] = Input::post('order_by');
+        }
+        
+        $message_logs = Model_MessageLog::find($conditions);
+        
+        $body = null;
+        
+        if (isset($message_logs)) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The Message Logs Are Found",
+                "data" => $message_logs
+            );
+        } else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Can't Find The Message Logs",
+                "data" => null
+            );
+        }
+        
+        $this->response($body, 200);
+    }
+    
+    public function post_delete_message()
+    {
+        //$is_message_not_found = false;
+        $is_deleted = false;
+        
+        $id = Input::post('id');
+        
+        $username = Input::post('username');
+        
+        if ($found_message = Model_Message::find_by_pk($id)) {
+            $is_log_save_successfully = Model_MessageLog::save_log(
+                $username,
+                'D',
+                $found_message->title,
+                '',
+                $found_message->message,
+                '',
+                '1'
+            );
+            
+            if ($is_log_save_successfully) {
+                $found_message_comments = Model_Comment::find(
+                    array(
+                        'select' => array(
+                            'id',
+                            'message_id'
+                        ),
+                        'where' => array(
+                            array('message_id', '=', $id),
+                        )
                     )
                 );
                 
-                $this->response($respuesta, 200);
-            } else {
-                $respuesta = array(
-                    "error" => "true",
-                    "msg" => 'id is incorrect'
-                );
+                if (isset($found_message_comments)) {
+                    foreach ($found_message_comments as $found_message_comment) {
+                        $found_message_comment->delete();
+                    }
+                }
                 
-                $this->response($respuesta, 404);
+                $found_message->delete();
+                
+                $is_deleted = true;
+            } else {
+                Model_MessageLog::save_log(
+                    $username,
+                    'D',
+                    $found_message->title,
+                    '',
+                    $found_message->message,
+                    '',
+                    '0'
+                );
             }
-        } else {
-            $respuesta = array(
-                "error" => "true",
-                "msg" => 'Not Found'
+        } /* else {
+            Model_MessageLog::save_log(
+                $username,
+                'D',
+                $found_message->title,
+                '',
+                $found_message->message,
+                '',
+                '0'
             );
             
-            $this->response($respuesta, 404);
+            $is_message_not_found = true;
+        } */
+        
+        $body = null;
+        
+        if ($is_deleted) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The Message Is Deleted",
+                "data" => null
+            );
+        }/*  else if ($is_message_not_found) {
+            $body = array(
+                "success" => "false",
+                "msg" => "Can't Find The Message",
+                "data" => $id
+            );
+        }  */else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Can't Delete The Message",
+                "data" => $id
+            );
         }
+        
+        $this->response($body, 200);
+    }
+    
+    public function post_add_comment()
+    {
+        $is_saved = false;
+        
+        $message_id = Input::post('id');
+        $username = Input::post('username');
+        $comment = Input::post('comment');
+        
+        $val = Model_Comment::validate('add_comment');
+        
+        if ($val->run()) {
+            $new_comment = Model_Comment::forge(
+                array(
+                    'message_id' => $message_id,
+                    'username' => $username,
+                    'comment' => $comment
+                )
+            );
+            
+            if ($new_comment && $new_comment->save()) {
+                $is_saved = true;
+            }
+        }
+        
+        $body = null;
+        
+        if ($is_saved) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The Comment Is Saved",
+                "data" => null
+            );
+        } else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Your <span class='muted'>Comment</span> Should Be At Least
+                                  <span class='muted'>\"1\"</span> Character",
+                "data" => null
+            );
+        }
+        
+        $this->response($body, 200);
+    }
+    
+    public function post_edit_comment()
+    {
+        $is_edited = false;
+        
+        $id = Input::post('id');
+        
+        $comment = Input::post('comment');
+        
+        $before_comment = null;
+        
+        if ($found_comment = Model_Comment::find_by_pk($id)) {
+            $before_comment = $found_comment->comment;
+            
+            $val = Model_Comment::validate('edit_comment');
+            
+            if ($val->run()) {
+                $found_comment->comment = $comment;
+                
+                if ($found_comment->save()) {
+                    $is_edited = true;
+                }
+            }
+        }
+        
+        $body = null;
+        
+        if ($is_edited) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The Comment Is Edited",
+                "data" => $found_comment
+            );
+        } else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Your <span class='muted'>Comment</span> Should Be At Least
+                                  <span class='muted'>\"1\"</span> Character",
+                "data" => null
+            );
+        }
+        
+        $this->response($body, 200);
+    }
+    
+    public function post_delete_comment()
+    {
+        $is_deleted = false;
+        
+        $id = Input::post('id');
+        
+        if ($found_comment = Model_Comment::find_by_pk($id)) {
+            $found_comment->delete();
+            
+            $is_deleted = true;
+        }
+        
+        $body = null;
+        
+        if ($is_deleted) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The Comment Is Deleted",
+                "data" => null
+            );
+        } else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Can't Delete The Comment",
+                "data" => $id
+            );
+        }
+        
+        $this->response($body, 200);
+    }
+    
+    public function get_find_users()
+    {
+        $conditions = array();
+        
+        if (Input::get('select') != null) {
+            $conditions['select'] = Input::get('select');
+        }
+        
+        $users = Model_User::find($conditions);
+        
+        $body = null;
+        
+        if (isset($users)) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The Users Are Found",
+                "data" => $users
+            );
+        } else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Can't Find The Users",
+                "data" => null
+            );
+        }
+        
+        $this->response($body, 200);
+    }
+    
+    /* public function get_find_message()
+    {
+        $id = Input::get('id');
+        
+        $message = Model_Message::find_by_pk($id);
+        
+        $body = null;
+        
+        if (isset($message)) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The Message Is found",
+                "data" => $message
+            );
+        } else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Can't found The Message",
+                "data" => $id
+            );
+        }
+        
+        $this->response($body, 200);
+    } */
+    
+    public function get_find_messages()
+    {
+        $conditions = array();
+        
+        if (Input::get('select') != null) {
+            $conditions['select'] = Input::get('select');
+        }
+        
+        if (Input::get('where') != null) {
+            $conditions['where'] = Input::get('where');
+        }
+        
+        if (Input::get('order_by') != null) {
+            $conditions['order_by'] = Input::get('order_by');
+        }
+        
+        $messages = Model_Message::find($conditions);
+        
+        $body = null;
+        
+        if (isset($messages)) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The Messages Are Found",
+                "data" => $messages
+            );
+        } else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Can't Find The Messages",
+                "data" => null
+            );
+        }
+        
+        $this->response($body, 200);
+    }
+    
+    public function get_find_comments()
+    {
+        $conditions = array();
+        
+        if (Input::get('select') != null) {
+            $conditions['select'] = Input::get('select');
+        }
+        
+        if (Input::get('where') != null) {
+            $conditions['where'] = Input::get('where');
+        }
+        
+        $comments = Model_Comment::find($conditions);
+        
+        $body = null;
+        
+        if (isset($comments)) {
+            $body = array(
+                "success" => "true",
+                "msg" => "The Comments Are Found",
+                "data" => $comments
+            );
+        } else {
+            $body = array(
+                "success" => "false",
+                "msg" => "Can't Find The Comments",
+                "data" => null
+            );
+        }
+        
+        $this->response($body, 200);
     }
 }

@@ -8,7 +8,7 @@
  */
 class Controller_Main extends \Controller_Template
 {
-    private $captcha_driver = 'recaptcha';
+    private $captcha_driver = 'simplecaptcha';
     
     /**
      * 將頁面導向views/main/index.php，
@@ -41,15 +41,25 @@ class Controller_Main extends \Controller_Template
             $is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
             
             if ( ! $is_captcha_incorrect) {
-                $found_user = Model_User::check_user(
-                    Input::post('username'),
-                    Input::post('password'),
-                    'IN TABLE'
+                $response = Tool_Ask::request_curl(
+                    'api/sign_in',
+                    'json',
+                    'post',
+                    array(
+                        'username' => Input::post('username'),
+                        'password' => Input::post('password')
+                    )
                 );
                 
-                if (($found_user == 'ERROR') || ($found_user == 'NOT IN TABLE')) {
-                    $error_message = 'Incorrect Username Or Password';
+                $body_json = $response->body();
+                
+                $body_array = json_decode($body_json);
+                
+                if ($body_array->success == 'false') {
+                    $error_message = $body_array->msg;
                 } else {
+                    $found_user = $body_array->data;
+                    
                     Session::set('ip_address', Input::real_ip());
                     
                     $date = Date::forge();
@@ -62,8 +72,8 @@ class Controller_Main extends \Controller_Template
                     Session::set('user_id', $found_user->id);
                     Session::set('username', $found_user->username);
                     Session::set('is_sign_in', 'True');
-                
-                    if ($found_user->is_admin == 1) {
+                    
+                    if ($found_user->is_admin == '1') {
                         Session::set('is_admin', '1');
                     
                         Response::redirect('admin');
@@ -95,7 +105,7 @@ class Controller_Main extends \Controller_Template
      */
     public function action_sign_out()
     {
-        is_null(Session::get('is_sign_in')) and Response::redirect('404');
+        is_null(Session::get('is_sign_in')) and Response::redirect('main');
         
         $ip_address = Session::get('ip_address');
         
@@ -140,19 +150,23 @@ class Controller_Main extends \Controller_Template
             $is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
             
             if ( ! $is_captcha_incorrect) {
-                $new_user = Model_User::check_user(
-                    Input::post('username'),
-                    Input::post('password'),
-                    'IN USE'
+                $response = Tool_Ask::request_curl(
+                    'api/sign_up',
+                    'json',
+                    'post',
+                    array(
+                        'username' => Input::post('username'),
+                        'password' => Input::post('password')
+                    )
                 );
                 
-                if ($new_user == 'ERROR') {
-                    $error_message = 'Your Username Should Be At Least \"1\" Character, And Your Password Should Be At Least \"4\" Characters';
-                } else if ($new_user == 'IN USE') {
-                    $error_message= 'Your Username Is Already In Use';
+                $body_json = $response->body();
+                
+                $body_array = json_decode($body_json);
+                
+                if ($body_array->success == 'false') {
+                    $error_message = $body_array->msg;
                 } else {
-                    $new_user->save();
-                    
                     Response::redirect('go');
                 }
             } else {

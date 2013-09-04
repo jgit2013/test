@@ -19,33 +19,49 @@ class Controller_Admin extends \Controller_Template
 	        Response::redirect('404');
 	    }
 	    
-	    $users = Model_User::find(array(
-	        'select' => array(
-	            'id',
-	            'username',
-	            'password',
-	            'is_admin'
-	        ),
-	    ));
+	    $find_users_response = Tool_Ask::request_curl(
+	        'api/find_users',
+	        'json',
+	        'get',
+	        array(
+	            'select' => array(
+	                'id',
+	                'username',
+	                'password',
+	                'is_admin'
+	            )
+	        )
+	    );
 	    
-	    $messages = Model_Message::find(array(
-	        'select' => array(
-	            'id',
-	            'time',
-	            'username',
-	            'title',
-	            'message'
-	        ),
-	        'order_by' => array('id' => 'desc'),
-	    ));
+	    $find_users_response_body_json = $find_users_response->body();
+	    
+	    $find_users_response_body_array = json_decode($find_users_response_body_json);
+	    
+	    $users = $find_users_response_body_array->data;
+	    
+	    $find_messages_response = Tool_Ask::request_curl(
+	        'api/find_messages',
+	        'json',
+	        'get',
+	        array(
+	            'select' => array(
+	                'id',
+	                'time',
+	                'username',
+	                'title',
+	                'message'
+	            ),
+	            'order_by' => array('id' => 'desc')
+	        )
+	    );
+	    
+	    $find_messages_response_body_json = $find_messages_response->body();
+	    
+	    $find_messages_response_body_array = json_decode($find_messages_response_body_json);
+	    
+	    $messages = $find_messages_response_body_array->data;
 	    
 	    $comments = array();
-	    
-	    foreach ($messages as $message) {
-	        $results = DB::select()->from('comments')->where('message_id', $message->id)->execute();
-	    
-	        $comments[$message->id] = count($results);
-	    }
 	    
 	    $view = View::forge('admin/index');
 	    
@@ -54,6 +70,12 @@ class Controller_Admin extends \Controller_Template
 	    }
 	    
 	    if (isset($messages)) {
+	        foreach ($messages as $message) {
+	            $results = DB::select()->from('comments')->where('message_id', $message->id)->execute();
+	            
+	            $comments[$message->id] = count($results);
+	        }
+	        
 	        $view->set('messages', $messages, true);
 	        $view->set('comments', $comments, true);
 	    }
@@ -82,45 +104,67 @@ class Controller_Admin extends \Controller_Template
 	        ));
 	        
 	        $conditions = null;
-	         
+	        
 	        if ($input->ip_address != '') {
 	            $conditions[] = array('ip_address', 'like', '%'.$input->ip_address.'%');
 	        }
-	         
+	        
 	        if ($input->username != '') {
 	            $conditions[] = array('username', '=', $input->username);
 	        }
-	         
+	        
 	        if ($input->sign_in_time != '') {
 	            $conditions[] = array('sign_in_time', 'like', '%'.$input->sign_in_time.'%');
 	        }
-	         
+	        
 	        if ($input->sign_out_time != '') {
 	            $conditions[] = array('sign_out_time', 'like', '%'.$input->sign_out_time.'%');
 	        }
-	         
-	        $found_user_logs = Model_UserLog::find(array(
-	            'select' => array(
-	                'ip_address',
-	                'username',
-	                'sign_in_time',
-	                'sign_out_time',
-	                'during'
-	            ),
-	            'where' => $conditions,
-	            'order_by' => array('id' => 'desc',),
-	        ));
+	        
+	        $find_user_logs_response = Tool_Ask::request_curl(
+	            'api/find_user_logs',
+	            'json',
+	            'post',
+	            array(
+	                'select' => array(
+	                    'ip_address',
+	                    'username',
+	                    'sign_in_time',
+	                    'sign_out_time',
+	                    'during'
+                    ),
+	                'where' => $conditions,
+	                'order_by' => array('id' => 'desc')
+	            )
+	        );
+	        
+	        $find_user_logs_response_body_json = $find_user_logs_response->body();
+	        
+	        $find_user_logs_response_body_array = json_decode($find_user_logs_response_body_json);
+	        
+	        $found_user_logs = $find_user_logs_response_body_array->data;
 	    } else {
-	        $found_user_logs = Model_UserLog::find(array(
-	            'select' => array(
-	                'ip_address',
-	                'username',
-	                'sign_in_time',
-	                'sign_out_time',
-	                'during'
-	            ),
-	            'order_by' => array('id' => 'desc'),
-	        ));
+	        $find_user_logs_response = Tool_Ask::request_curl(
+	            'api/find_user_logs',
+	            'json',
+	            'post',
+	            array(
+	                'select' => array(
+	                    'ip_address',
+	                    'username',
+	                    'sign_in_time',
+	                    'sign_out_time',
+	                    'during'
+	                ),
+	                'order_by' => array('id' => 'desc')
+	            )
+	        );
+	        
+	        $find_user_logs_response_body_json = $find_user_logs_response->body();
+	        
+	        $find_user_logs_response_body_array = json_decode($find_user_logs_response_body_json);
+	        
+	        $found_user_logs = $find_user_logs_response_body_array->data;
 	    }
 	    
 	    $view = View::forge('admin/view_user_logs');
@@ -190,34 +234,56 @@ class Controller_Admin extends \Controller_Template
 	            $conditions[] = array('is_succeed', '=', $input->is_succeed);
 	        }
 	        
-	        $found_message_logs = Model_MessageLog::find(array(
-	            'select' => array(
-	                'time',
-	                'username',
-	                'action',
-	                'before_title',
-	                'after_title',
-	                'before_message',
-	                'after_message',
-	                'is_succeed'
-	            ),
-	            'where' => $conditions,
-	            'order_by' => array('id' => 'desc',),
-	        ));
+	        $find_message_logs_response = Tool_Ask::request_curl(
+	            'api/find_message_logs',
+	            'json',
+	            'post',
+	            array(
+	                'select' => array(
+	                    'time',
+	                    'username',
+	                    'action',
+	                    'before_title',
+	                    'after_title',
+	                    'before_message',
+	                    'after_message',
+	                    'is_succeed'
+	                ),
+	                'where' => $conditions,
+	                'order_by' => array('id' => 'desc')
+	            )
+	        );
+	        
+	        $find_message_logs_response_body_json = $find_message_logs_response->body();
+	        
+	        $find_message_logs_response_body_array = json_decode($find_message_logs_response_body_json);
+	        
+	        $found_message_logs = $find_message_logs_response_body_array->data;
 	    } else {
-	        $found_message_logs = Model_MessageLog::find(array(
-	            'select' => array(
-	                'time',
-	                'username',
-	                'action',
-	                'before_title',
-	                'after_title',
-	                'before_message',
-	                'after_message',
-	                'is_succeed'
-	            ),
-	            'order_by' => array('id' => 'desc'),
-	        ));
+	        $find_message_logs_response = Tool_Ask::request_curl(
+	            'api/find_message_logs',
+	            'json',
+	            'post',
+	            array(
+	                'select' => array(
+	                    'time',
+	                    'username',
+	                    'action',
+	                    'before_title',
+	                    'after_title',
+	                    'before_message',
+	                    'after_message',
+	                    'is_succeed'
+	                ),
+	                'order_by' => array('id' => 'desc')
+	            )
+	        );
+	        
+	        $find_message_logs_response_body_json = $find_message_logs_response->body();
+	        
+	        $find_message_logs_response_body_array = json_decode($find_message_logs_response_body_json);
+	        
+	        $found_message_logs = $find_message_logs_response_body_array->data;
 	    }
 	    
 	    $view = View::forge('admin/view_message_logs');
@@ -241,10 +307,34 @@ class Controller_Admin extends \Controller_Template
 	    
 	    is_null($id) and Response::redirect('admin');
 	    
-	    if ($user = Model_User::find_by_pk($id)) {
-	        $user->delete();
+	    $response = Tool_Ask::request_curl(
+	        'api/delete_user',
+	        'json',
+	        'post',
+	        array(
+	            'id' => $id
+	        )
+	    );
+	    
+	    $response_body_json = $response->body();
+	    
+	    $response_body_array = json_decode($response_body_json);
+	    
+	    $is_succeed = $response_body_array->success;
+	    
+	    if ($is_succeed == 'false') {
+	        Response::redirect('admin/back');
 	    }
 	    
 	    Response::redirect('admin');
+	}
+	
+	/**
+	 * 將頁面導向views/admin/back.php
+	 */
+	public function action_back()
+	{
+	    $this->template->title = "Sorry, Can't Delete The User";
+	    $this->template->content = View::forge('admin/back');
 	}
 }
