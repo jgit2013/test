@@ -83,7 +83,7 @@ class Controller_Api extends \Controller_Rest
             $body = array(
                 "success" => "true",
                 "msg" => "The User Is Deleted",
-                "data" => null
+                "data" => $found_user
             );
         } else {
             $body = array(
@@ -150,7 +150,7 @@ class Controller_Api extends \Controller_Rest
                 'message' => $message
             ));
             
-            if (isset($new_message) && $new_message->save()) {
+            if ($new_message && $new_message->save()) {
                 Model_MessageLog::save_log(
                     $username,
                     'C',
@@ -197,8 +197,8 @@ class Controller_Api extends \Controller_Rest
             $body = array(
                 "success" => "false",
                 "msg" => "Your <span class='muted'>Title</span> And
-                                   <span class='muted'>Message</span> Should Be At Least
-                                   <span class='muted'>\"1\"</span> Character",
+                                  <span class='muted'>Message</span> Should Be At Least
+                                  <span class='muted'>\"1\"</span> Character",
                 "data" => null
             );
         }
@@ -208,7 +208,6 @@ class Controller_Api extends \Controller_Rest
     
     public function post_edit_message()
     {
-        $is_message_not_found = false;
         $is_edited = false;
         
         $id = Input::post('id');
@@ -220,21 +219,17 @@ class Controller_Api extends \Controller_Rest
         $before_title = null;
         $before_message = null;
         
-        if ( ! $message = Model_Message::find_by_pk($id)) {
-            $is_message_not_found = true;
-        } else {
-            $before_title = $message->title;
-            $before_message = $message->message;
-        }
-        
-        if ( ! $is_message_not_found) {
+        if ($found_message = Model_Message::find_by_pk($id)) {
+            $before_title = $found_message->title;
+            $before_message = $found_message->message;
+            
             $val = Model_Message::validate('edit_message');
             
             if ($val->run()) {
-                $message->title = $after_title;
-                $message->message = $after_message;
+                $found_message->title = $after_title;
+                $found_message->message = $after_message;
                 
-                $message->save();
+                $found_message->save();
                 
                 Model_MessageLog::save_log(
                     $username,
@@ -266,20 +261,14 @@ class Controller_Api extends \Controller_Rest
             $body = array(
                 "success" => "true",
                 "msg" => "The Message Is Edited",
-                "data" => $message
-            );
-        } else if ($is_message_not_found) {
-            $body = array(
-                "success" => "false",
-                "msg" => "Can't Find The Message",
-                "data" => $id
+                "data" => $found_message
             );
         } else {
             $body = array(
                 "success" => "false",
                 "msg" => "Your <span class='muted'>Title</span> And
-                                   <span class='muted'>Message</span> Should Be At Least
-                                   <span class='muted'>\"1\"</span> Character",
+                                  <span class='muted'>Message</span> Should Be At Least
+                                  <span class='muted'>\"1\"</span> Character",
                 "data" => null
             );
         }
@@ -326,7 +315,6 @@ class Controller_Api extends \Controller_Rest
     
     public function post_delete_message()
     {
-        //$is_message_not_found = false;
         $is_deleted = false;
         
         $id = Input::post('id');
@@ -357,7 +345,7 @@ class Controller_Api extends \Controller_Rest
                     )
                 );
                 
-                if (isset($found_message_comments)) {
+                if ($found_message_comments) {
                     foreach ($found_message_comments as $found_message_comment) {
                         $found_message_comment->delete();
                     }
@@ -377,19 +365,7 @@ class Controller_Api extends \Controller_Rest
                     '0'
                 );
             }
-        } /* else {
-            Model_MessageLog::save_log(
-                $username,
-                'D',
-                $found_message->title,
-                '',
-                $found_message->message,
-                '',
-                '0'
-            );
-            
-            $is_message_not_found = true;
-        } */
+        }
         
         $body = null;
         
@@ -397,15 +373,9 @@ class Controller_Api extends \Controller_Rest
             $body = array(
                 "success" => "true",
                 "msg" => "The Message Is Deleted",
-                "data" => null
+                "data" => $found_message
             );
-        }/*  else if ($is_message_not_found) {
-            $body = array(
-                "success" => "false",
-                "msg" => "Can't Find The Message",
-                "data" => $id
-            );
-        }  */else {
+        } else {
             $body = array(
                 "success" => "false",
                 "msg" => "Can't Delete The Message",
@@ -522,7 +492,7 @@ class Controller_Api extends \Controller_Rest
             $body = array(
                 "success" => "true",
                 "msg" => "The Comment Is Deleted",
-                "data" => null
+                "data" => $found_comment
             );
         } else {
             $body = array(
@@ -543,15 +513,23 @@ class Controller_Api extends \Controller_Rest
             $conditions['select'] = Input::get('select');
         }
         
-        $users = Model_User::find($conditions);
+        if (Input::get('where') != null) {
+            $conditions['where'] = Input::get('where');
+        }
+        
+        if (Input::get('order_by') != null) {
+            $conditions['order_by'] = Input::get('order_by');
+        }
+        
+        $found_users = Model_User::find($conditions);
         
         $body = null;
         
-        if (isset($users)) {
+        if (isset($found_users)) {
             $body = array(
                 "success" => "true",
                 "msg" => "The Users Are Found",
-                "data" => $users
+                "data" => $found_users
             );
         } else {
             $body = array(
@@ -563,31 +541,6 @@ class Controller_Api extends \Controller_Rest
         
         $this->response($body, 200);
     }
-    
-    /* public function get_find_message()
-    {
-        $id = Input::get('id');
-        
-        $message = Model_Message::find_by_pk($id);
-        
-        $body = null;
-        
-        if (isset($message)) {
-            $body = array(
-                "success" => "true",
-                "msg" => "The Message Is found",
-                "data" => $message
-            );
-        } else {
-            $body = array(
-                "success" => "false",
-                "msg" => "Can't found The Message",
-                "data" => $id
-            );
-        }
-        
-        $this->response($body, 200);
-    } */
     
     public function get_find_messages()
     {
@@ -605,15 +558,15 @@ class Controller_Api extends \Controller_Rest
             $conditions['order_by'] = Input::get('order_by');
         }
         
-        $messages = Model_Message::find($conditions);
+        $found_messages = Model_Message::find($conditions);
         
         $body = null;
         
-        if (isset($messages)) {
+        if (isset($found_messages)) {
             $body = array(
                 "success" => "true",
                 "msg" => "The Messages Are Found",
-                "data" => $messages
+                "data" => $found_messages
             );
         } else {
             $body = array(
@@ -638,15 +591,19 @@ class Controller_Api extends \Controller_Rest
             $conditions['where'] = Input::get('where');
         }
         
-        $comments = Model_Comment::find($conditions);
+        if (Input::get('order_by') != null) {
+            $conditions['order_by'] = Input::get('order_by');
+        }
+        
+        $found_comments = Model_Comment::find($conditions);
         
         $body = null;
         
-        if (isset($comments)) {
+        if (isset($found_comments)) {
             $body = array(
                 "success" => "true",
                 "msg" => "The Comments Are Found",
-                "data" => $comments
+                "data" => $found_comments
             );
         } else {
             $body = array(

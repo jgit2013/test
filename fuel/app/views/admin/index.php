@@ -57,7 +57,9 @@
                     <td><?php echo $comments[$message->id]; ?></td>
                     <td>
                         <?php echo Html::anchor('view_message/'.$message->id, '<i class="icon-eye-open" title="View"></i>'); ?>
-                         | <?php echo Html::anchor('edit_message/'.$message->id, '<i class="icon-wrench" title="Edit"></i>'); ?>
+                        <?php if (Session::get('username') == $message->username): ?>
+                             | <?php echo Html::anchor('edit_message/'.$message->id, '<i class="icon-wrench" title="Edit"></i>'); ?>
+                         <?php endif ?>
                          | <?php echo Html::anchor('delete_message/'.$message->id, '<i class="icon-trash" title="Delete"></i>', array('onclick' => "return confirm('Are you sure?')")); ?>
                     </td>
                 </tr>

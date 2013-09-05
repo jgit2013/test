@@ -330,11 +330,11 @@ class Controller_Admin extends \Controller_Template
 	}
 	
 	/**
-	 * 將頁面導向views/admin/back.php
+	 * 將頁面導向views/admin/fail.php
 	 */
-	public function action_back()
+	public function action_fail()
 	{
 	    $this->template->title = "Sorry, Can't Delete The User";
-	    $this->template->content = View::forge('admin/back');
+	    $this->template->content = View::forge('admin/fail');
 	}
 }

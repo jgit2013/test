@@ -8,7 +8,7 @@
  */
 class Controller_Main extends \Controller_Template
 {
-    private $captcha_driver = 'simplecaptcha';
+    private $captcha_driver = 'recaptcha';
     
     /**
      * 將頁面導向views/main/index.php，
