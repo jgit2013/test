@@ -21,7 +21,7 @@ class Controller_User extends \Controller_Template
         }
         
         $response = Tool_Ask::request_curl(
-            'api/find_messages',
+            'api/get/find_messages',
             'json',
             'get',
             array(

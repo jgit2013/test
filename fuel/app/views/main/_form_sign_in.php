@@ -16,17 +16,17 @@
             </div>
         </div>
         
-        <div class="control-group">
-            <?php echo Form::label('CAPTCHA', 'captcha', array('class'=>'control-label')); ?>
+<!--         <div class="control-group"> -->
+            <?php //echo Form::label('CAPTCHA', 'captcha', array('class'=>'control-label')); ?>
             
-            <div class="controls">
-                <?php if ($captcha_driver == 'simplecaptcha'): ?>
-                    <?php echo Captcha::forge('simplecaptcha')->html(); ?>
-                <?php elseif ($captcha_driver == 'recaptcha'): ?>
-                    <?php echo Captcha::forge('recaptcha')->html(); ?>
-                <?php endif; ?>
-            </div>
-        </div>
+<!--             <div class="controls"> -->
+                <?php //if ($captcha_driver == 'simplecaptcha'): ?>
+                    <?php //echo Captcha::forge('simplecaptcha')->html(); ?>
+                <?php //elseif ($captcha_driver == 'recaptcha'): ?>
+                    <?php //echo Captcha::forge('recaptcha')->html(); ?>
+                <?php //endif; ?>
+<!--             </div> -->
+<!--         </div> -->
         
         <div class="control-group">
             <label class='control-label'>&nbsp;</label>

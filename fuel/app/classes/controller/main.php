@@ -8,7 +8,7 @@
  */
 class Controller_Main extends \Controller_Template
 {
-    private $captcha_driver = 'recaptcha';
+    //private $captcha_driver = 'recaptcha';
     
     /**
      * 將頁面導向views/main/index.php，
@@ -38,11 +38,11 @@ class Controller_Main extends \Controller_Template
         $error_message = null;
         
         if (Input::method() == 'POST') {
-            $is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
+            //$is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
             
-            if ( ! $is_captcha_incorrect) {
+            //if ( ! $is_captcha_incorrect) {
                 $response = Tool_Ask::request_curl(
-                    'api/sign_in',
+                    'api/post/sign_in',
                     'json',
                     'post',
                     array(
@@ -83,9 +83,9 @@ class Controller_Main extends \Controller_Template
                         Response::redirect('user');
                     }
                 }
-            } else {
+            /* } else {
                 $error_message = 'CAPTCHA Is Incorrect';
-            }
+            } */
         }
         
         $view = View::forge('main/sign_in');
@@ -94,7 +94,7 @@ class Controller_Main extends \Controller_Template
             $view->set('error_message', $error_message, false);
         }
         
-        $this->template->set_global('captcha_driver', $this->captcha_driver, false);
+        //$this->template->set_global('captcha_driver', $this->captcha_driver, false);
         
         $this->template->title = "Sign In";
         $this->template->content = $view;
@@ -147,11 +147,11 @@ class Controller_Main extends \Controller_Template
         $error_message = null;
         
         if (Input::method() == 'POST') {
-            $is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
+            //$is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
             
-            if ( ! $is_captcha_incorrect) {
+            //if ( ! $is_captcha_incorrect) {
                 $response = Tool_Ask::request_curl(
-                    'api/sign_up',
+                    'api/post/sign_up',
                     'json',
                     'post',
                     array(
@@ -169,9 +169,9 @@ class Controller_Main extends \Controller_Template
                 } else {
                     Response::redirect('go');
                 }
-            } else {
+            /* } else {
                 $error_message = 'CAPTCHA Is Incorrect';
-            }
+            } */
         }
         
         $view = View::forge('main/sign_up');
@@ -180,7 +180,7 @@ class Controller_Main extends \Controller_Template
             $view->set('error_message', $error_message, false);
         }
         
-        $this->template->set_global('captcha_driver', $this->captcha_driver, false);
+        //$this->template->set_global('captcha_driver', $this->captcha_driver, false);
         
         $this->template->title = "Sign Up";
         $this->template->content = $view;

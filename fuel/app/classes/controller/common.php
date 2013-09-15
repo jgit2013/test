@@ -24,7 +24,7 @@ class Controller_Common extends \Controller_Template
         }
         
         $find_messages_response = Tool_Ask::request_curl(
-            'api/find_messages',
+            'api/get/find_messages',
             'json',
             'get',
             array(
@@ -55,7 +55,7 @@ class Controller_Common extends \Controller_Template
             $found_messages = $find_messages_response_body_array->data;
             
             $find_message_comments_response = Tool_Ask::request_curl(
-                'api/find_comments',
+                'api/get/find_comments',
                 'json',
                 'get',
                 array(
@@ -104,7 +104,7 @@ class Controller_Common extends \Controller_Template
         
         if (Input::method() == 'POST') {
             $response = Tool_Ask::request_curl(
-                'api/add_message',
+                'api/post/create_message',
                 'json',
                 'post',
                 array(
@@ -156,7 +156,7 @@ class Controller_Common extends \Controller_Template
         }
         
         $find_messages_response = Tool_Ask::request_curl(
-            'api/find_messages',
+            'api/get/find_messages',
             'json',
             'get',
             array(
@@ -237,9 +237,9 @@ class Controller_Common extends \Controller_Template
         }
         
         $response = Tool_Ask::request_curl(
-            'api/delete_message',
+            'api/delete/message',
             'json',
-            'post',
+            'delete',
             array(
                 'id' => $id,
                 'username' => Session::get('username')
@@ -293,7 +293,7 @@ class Controller_Common extends \Controller_Template
         
         if (Input::method() == 'POST') {
             $response = Tool_Ask::request_curl(
-                'api/add_comment',
+                'api/post/create_comment',
                 'json',
                 'post',
                 array(
@@ -343,7 +343,7 @@ class Controller_Common extends \Controller_Template
         }
         
         $find_comments_response = Tool_Ask::request_curl(
-            'api/find_comments',
+            'api/get/find_comments',
             'json',
             'get',
             array(
@@ -418,7 +418,7 @@ class Controller_Common extends \Controller_Template
         }
         
         $find_comments_response = Tool_Ask::request_curl(
-            'api/find_comments',
+            'api/get/find_comments',
             'json',
             'get',
             array(
@@ -439,9 +439,9 @@ class Controller_Common extends \Controller_Template
         $found_comments = $find_comments_response_body_array->data;
         
         $response = Tool_Ask::request_curl(
-            'api/delete_comment',
+            'api/delete/comment',
             'json',
-            'post',
+            'delete',
             array(
                 'id' => $id,
             )

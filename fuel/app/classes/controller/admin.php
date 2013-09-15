@@ -20,7 +20,7 @@ class Controller_Admin extends \Controller_Template
 	    }
 	    
 	    $find_users_response = Tool_Ask::request_curl(
-	        'api/find_users',
+	        'api/get/find_users',
 	        'json',
 	        'get',
 	        array(
@@ -40,7 +40,7 @@ class Controller_Admin extends \Controller_Template
 	    $users = $find_users_response_body_array->data;
 	    
 	    $find_messages_response = Tool_Ask::request_curl(
-	        'api/find_messages',
+	        'api/get/find_messages',
 	        'json',
 	        'get',
 	        array(
@@ -122,9 +122,9 @@ class Controller_Admin extends \Controller_Template
 	        }
 	        
 	        $find_user_logs_response = Tool_Ask::request_curl(
-	            'api/find_user_logs',
+	            'api/get/find_user_logs',
 	            'json',
-	            'post',
+	            'get',
 	            array(
 	                'select' => array(
 	                    'ip_address',
@@ -145,9 +145,9 @@ class Controller_Admin extends \Controller_Template
 	        $found_user_logs = $find_user_logs_response_body_array->data;
 	    } else {
 	        $find_user_logs_response = Tool_Ask::request_curl(
-	            'api/find_user_logs',
+	            'api/get/find_user_logs',
 	            'json',
-	            'post',
+	            'get',
 	            array(
 	                'select' => array(
 	                    'ip_address',
@@ -235,9 +235,9 @@ class Controller_Admin extends \Controller_Template
 	        }
 	        
 	        $find_message_logs_response = Tool_Ask::request_curl(
-	            'api/find_message_logs',
+	            'api/get/find_message_logs',
 	            'json',
-	            'post',
+	            'get',
 	            array(
 	                'select' => array(
 	                    'time',
@@ -261,9 +261,9 @@ class Controller_Admin extends \Controller_Template
 	        $found_message_logs = $find_message_logs_response_body_array->data;
 	    } else {
 	        $find_message_logs_response = Tool_Ask::request_curl(
-	            'api/find_message_logs',
+	            'api/get/find_message_logs',
 	            'json',
-	            'post',
+	            'get',
 	            array(
 	                'select' => array(
 	                    'time',
@@ -308,9 +308,9 @@ class Controller_Admin extends \Controller_Template
 	    is_null($id) and Response::redirect('admin');
 	    
 	    $response = Tool_Ask::request_curl(
-	        'api/delete_user',
+	        'api/delete/user',
 	        'json',
-	        'post',
+	        'delete',
 	        array(
 	            'id' => $id
 	        )

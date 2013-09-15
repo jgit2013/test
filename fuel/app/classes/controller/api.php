@@ -1,9 +1,8 @@
 <?php
-class Controller_Api extends \Controller_Rest
-{
+class Controller_Api extends Controller_Rest {
     protected $format = 'json';
     
-    public function post_sign_in()
+    /* public function post_sign_in()
     {
         $found_user = Model_User::check_user(
             Input::post('username'),
@@ -63,9 +62,9 @@ class Controller_Api extends \Controller_Rest
         }
         
         $this->response($body, 200);
-    }
+    } */
     
-    public function post_delete_user()
+    /* public function post_delete_user()
     {
         $is_deleted = false;
         
@@ -94,9 +93,9 @@ class Controller_Api extends \Controller_Rest
         }
         
         $this->response($body, 200);
-    }
+    } */
     
-    public function post_find_user_logs()
+    /* public function post_find_user_logs()
     {
         $conditions = array();
         
@@ -131,9 +130,9 @@ class Controller_Api extends \Controller_Rest
         }
         
         $this->response($body, 200);
-    }
+    } */
     
-    public function post_add_message()
+    /* public function post_add_message()
     {
         $is_saved = false;
         
@@ -204,7 +203,7 @@ class Controller_Api extends \Controller_Rest
         }
         
         $this->response($body, 200);
-    }
+    } */
     
     public function post_edit_message()
     {
@@ -276,7 +275,7 @@ class Controller_Api extends \Controller_Rest
         $this->response($body, 200);
     }
     
-    public function post_find_message_logs()
+    /* public function post_find_message_logs()
     {
         $conditions = array();
         
@@ -311,9 +310,9 @@ class Controller_Api extends \Controller_Rest
         }
         
         $this->response($body, 200);
-    }
+    } */
     
-    public function post_delete_message()
+    /* public function post_delete_message()
     {
         $is_deleted = false;
         
@@ -384,9 +383,9 @@ class Controller_Api extends \Controller_Rest
         }
         
         $this->response($body, 200);
-    }
+    } */
     
-    public function post_add_comment()
+    /* public function post_add_comment()
     {
         $is_saved = false;
         
@@ -428,7 +427,7 @@ class Controller_Api extends \Controller_Rest
         }
         
         $this->response($body, 200);
-    }
+    } */
     
     public function post_edit_comment()
     {
@@ -474,7 +473,7 @@ class Controller_Api extends \Controller_Rest
         $this->response($body, 200);
     }
     
-    public function post_delete_comment()
+    /* public function post_delete_comment()
     {
         $is_deleted = false;
         
@@ -503,9 +502,9 @@ class Controller_Api extends \Controller_Rest
         }
         
         $this->response($body, 200);
-    }
+    } */
     
-    public function get_find_users()
+    /* public function get_find_users()
     {
         $conditions = array();
         
@@ -614,5 +613,5 @@ class Controller_Api extends \Controller_Rest
         }
         
         $this->response($body, 200);
-    }
+    } */
 }
