@@ -205,15 +205,17 @@ class Controller_Api extends Controller_Rest {
         $this->response($body, 200);
     } */
     
-    public function post_edit_message()
+    public function put_edit_message()
     {
         $is_edited = false;
         
-        $id = Input::post('id');
+        $request = Input::all();
         
-        $username = Input::post('username');
-        $after_title = Input::post('title');
-        $after_message = Input::post('message');
+        $id = Input::put('id');
+        
+        $username = Input::put('username');
+        $after_title = Input::put('title');
+        $after_message = Input::put('message');
         
         $before_title = null;
         $before_message = null;
@@ -222,9 +224,10 @@ class Controller_Api extends Controller_Rest {
             $before_title = $found_message->title;
             $before_message = $found_message->message;
             
-            $val = Model_Message::validate('edit_message');
+            //$val = Model_Message::validate('edit_message');
             
-            if ($val->run()) {
+            if (/* $val->run() */(($after_title != null) && ($after_message != null))
+                 && (($after_title != $before_title) || ($after_message != $before_message))) {
                 $found_message->title = $after_title;
                 $found_message->message = $after_message;
                 
@@ -268,7 +271,7 @@ class Controller_Api extends Controller_Rest {
                 "msg" => "Your <span class='muted'>Title</span> And
                                   <span class='muted'>Message</span> Should Be At Least
                                   <span class='muted'>\"1\"</span> Character",
-                "data" => null
+                "data" => $request
             );
         }
         
@@ -429,13 +432,13 @@ class Controller_Api extends Controller_Rest {
         $this->response($body, 200);
     } */
     
-    public function post_edit_comment()
+    public function put_edit_comment()
     {
         $is_edited = false;
         
-        $id = Input::post('id');
+        $id = Input::put('id');
         
-        $comment = Input::post('comment');
+        $comment = Input::put('comment');
         
         $before_comment = null;
         
