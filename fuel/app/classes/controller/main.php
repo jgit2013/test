@@ -4,18 +4,16 @@
  *
  * 登入頁面的主要Controller
  *
- * @author    J
+ * @author  J
  */
-class Controller_Main extends \Controller_Template
-{
+class Controller_Main extends \Controller_Template {
     //private $captcha_driver = 'recaptcha';
     
     /**
      * 將頁面導向views/main/index.php，
      * 內容為主要的頁面，可選擇登入或建立新的使用者
      */
-    public function action_index()
-    {
+    public function action_index() {
         if ( ! is_null(Session::get('is_sign_in'))) {
             if (Session::get('is_admin') == '1') {
                 Response::redirect('admin');
@@ -33,15 +31,56 @@ class Controller_Main extends \Controller_Template
      * 若未登入時顯示登入頁面， 
      * 若使用者名稱或密碼錯誤時顯示錯誤訊息
      */
-    public function action_sign_in()
-    {
+    public function action_sign_in() {
         $error_message = null;
         
         if (Input::method() == 'POST') {
+            $response = Api::request_curl(
+                'api/user/access/sign_in',
+                'post',
+                array(
+                    'username' => Input::post('username'),
+                    'password' => Input::post('password')
+                )
+            );
+            
+            $body = $response->body;
+            
+            if ($body['success'] == 'false') {
+                $error_message = $body['msg'];
+            } else {
+                $found_user = $body['data'];
+                
+                Session::set('ip_address', Input::real_ip());
+                
+                $date = Date::forge();
+                
+                $date->set_timezone('Asia/Taipei');
+                
+                Session::set('sign_in_timestamp', $date->get_timestamp());
+                Session::set('sign_in_time', $date->format('%Y-%m-%d %H:%M:%S'));
+                
+                Session::set('user_id', $found_user['id']);
+                Session::set('username', $found_user['username']);
+                Session::set('is_sign_in', 'True');
+                
+                if ($found_user['is_admin'] == '1') {
+                    Session::set('is_admin', '1');
+            
+                    Response::redirect('admin');
+                } else {
+                    Session::set('is_admin', '0');
+            
+                    Response::redirect('user');
+                }
+            }
+            
+            
+            
             //$is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
             
             //if ( ! $is_captcha_incorrect) {
-                $response = Tool_Ask::request_curl(
+                /* $response = Tool_Ask::request_curl(
                     'api/post/sign_in',
                     'json',
                     'post',
@@ -82,7 +121,7 @@ class Controller_Main extends \Controller_Template
                     
                         Response::redirect('user');
                     }
-                }
+                } */
             /* } else {
                 $error_message = 'CAPTCHA Is Incorrect';
             } */
@@ -103,8 +142,7 @@ class Controller_Main extends \Controller_Template
     /**
      * 登出使用者並銷毀該次的Session物件
      */
-    public function action_sign_out()
-    {
+    public function action_sign_out() {
         is_null(Session::get('is_sign_in')) and Response::redirect('main');
         
         $ip_address = Session::get('ip_address');
@@ -142,15 +180,33 @@ class Controller_Main extends \Controller_Template
      * 若未建立新使用者時顯示建立新使用者的頁面， 
      * 若使用者名稱或密碼長度不足時顯示錯誤訊息
      */
-    public function action_sign_up()
-    {
+    public function action_sign_up() {
         $error_message = null;
         
         if (Input::method() == 'POST') {
+            $response = Api::request_curl(
+                'api/user/create/new',
+                'post',
+                array(
+                    'username' => Input::post('username'),
+                    'password' => Input::post('password')
+                )
+            );
+            
+            $body = $response->body;
+            
+            if ($body['success'] == 'false') {
+                $error_message = $body['msg'];
+            } else {
+                Response::redirect('go');
+            }
+            
+            
+            
             //$is_captcha_incorrect = ! Captcha::forge($this->captcha_driver)->check();
             
             //if ( ! $is_captcha_incorrect) {
-                $response = Tool_Ask::request_curl(
+                /* $response = Tool_Ask::request_curl(
                     'api/post/sign_up',
                     'json',
                     'post',
@@ -168,7 +224,7 @@ class Controller_Main extends \Controller_Template
                     $error_message = $body_array->msg;
                 } else {
                     Response::redirect('go');
-                }
+                } */
             /* } else {
                 $error_message = 'CAPTCHA Is Incorrect';
             } */
@@ -189,8 +245,7 @@ class Controller_Main extends \Controller_Template
     /**
      * 將頁面導向views/main/go.php
      */
-    public function action_go()
-    {
+    public function action_go() {
         $this->template->title = "Success, Please Sign In";
         $this->template->content = View::forge('main/go');
     }

@@ -6,21 +6,37 @@
  *
  * @author    J
  */
-class Controller_User extends \Controller_Template
-{
+class Controller_User extends \Controller_Template {
     /**
      * 將頁面導向views/user/index.php，
      * 內容為留言版的頁面，
      * 除了可以建立新的訊息外，也可選擇觀看自己或其他人建立的訊息，
      * 且修改或刪除自己留的訊息 ，而訊息排列方式會由最新的訊息排到最舊的訊息
      */
-    public function action_index()
-    {
+    public function action_index() {
         if (is_null(Session::get('is_sign_in')) || (Session::get('is_admin') == '1')) {
             Response::redirect('404');
         }
         
-        $response = Tool_Ask::request_curl(
+        $response = Api::request_curl(
+            'api/message/find/list',
+            'get',
+            array(
+                'sort' => 'DESC',
+                'limit' => 'all'
+            )
+        );
+        
+        echo '<pre>'; print_r($response->body);
+        
+        Session::destroy();
+        
+        exit;
+        
+        
+        
+        
+        /* $response = Tool_Ask::request_curl(
             'api/get/find_messages',
             'json',
             'get',
@@ -38,7 +54,7 @@ class Controller_User extends \Controller_Template
         
         $body_json = $response->body();
         
-        $body_array = json_decode($body_json);
+        $body_array = json_decode($body_json); */
         
         $messages = $body_array->data;
         
